@@ -4,6 +4,7 @@ Ubuntu
 1. $ sudo apt-get update
 2. $ sudo apt-get install build-essential
 3. $ sudo apt-get install gfortran
+
 Windows
 1. Install MinGW
 2. Install compilers (c++, python, fortran)
