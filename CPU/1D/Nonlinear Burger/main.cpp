@@ -23,11 +23,11 @@ double f(double x) {
 
 // GWRM function
 vector<double> gwrm(const vector<double> x) {
-    int nelem = x.size();
+	int nelem = x.size();
 	double sum;
-    vector<double> fvec(nelem,0);
+	vector<double> fvec(nelem,0);
 	Matrix a(K+1, vector<double>(L+1,0));
-    Matrix at(K+1, vector<double>(L+1,0));
+	Matrix at(K+1, vector<double>(L+1,0));
 	Matrix ax(K+1, vector<double>(L+1,0));
 	Matrix axx(K+1, vector<double>(L+1,0));
 	Matrix a_ax(K+1, vector<double>(L+1,0));
@@ -36,7 +36,7 @@ vector<double> gwrm(const vector<double> x) {
 		for (int j = 0; j < L+1; j++) {
 			a[i][j] = x[i + (K + 1) * j];
 		}
-    }
+	}
 	
 	chebyshev_x_derivative_2D_array(K, L, a, ax, BMAx);
 	chebyshev_x_derivative_2D_array(K, L, ax, axx, BMAx);
@@ -49,14 +49,14 @@ vector<double> gwrm(const vector<double> x) {
 		for (int j = 0; j < L+1; j++) {
 			fvec[i + (K + 1) * j] = at[i][j] + a_ax[i][j] - nu * axx[i][j];
 		}
-    }
+	}
 	
 	// initial condition: L mode
 	for (int i = 0; i < K-1; i++) {
 		sum = 0.5 * a[i][0];
 		for (int j = 1; j < L+1; j++) { sum += pow(-1,j) * a[i][j]; }
 		fvec[i + (K + 1) * L] = sum - init[i];
-    }
+	}
 	
 	// boundary conditions: K and K-1 mode
 	for (int j = 0; j < L+1; j++) {
@@ -67,36 +67,34 @@ vector<double> gwrm(const vector<double> x) {
 		sum = 0.5 * a[0][j];
 		for (int i = 1; i < K+1; i++) { sum += pow(-1,i) * a[i][j]; }
 		fvec[(K - 1) + (K + 1) * j] = sum - 0.0;
-    }
+	}
 	
-	
-
-    return fvec;
+	return fvec;
 }
 
 int main()
 {
-    vector<double> x0((K + 1) * (L + 1),0);
-    vector<double> x1((K + 1) * (L + 1));
+    	vector<double> x0((K + 1) * (L + 1),0);
+    	vector<double> x1((K + 1) * (L + 1));
 	
 	chebyshev_coefficients_1D(K+1, f, init, BMAx, BPAx);
 	for (double elem : init) {
-        cout << elem << " ";
-    }
+        	cout << elem << " ";
+    	}
 	cout << endl;
 	for (int i = 0; i < K+1; i++) {
 		x0[i + (K + 1) * 0] = init[i];
-    }
-    clock_t c_start = clock();
-    //x1 = quasi_newton(x0, gwrm);
+    	}
+    	clock_t c_start = clock();
+    	//x1 = quasi_newton(x0, gwrm);
 	x1 = newton(x0, gwrm);
-    clock_t c_end = clock();
+    	clock_t c_end = clock();
 
-    long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
-    cout << "CPU time used: " << time_elapsed_ms << " ms\n";
-    for (double elem : x1) {
-        cout << elem << " ";
-    }
-    cout << endl;
-    return 0;
+    	long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
+    	cout << "CPU time used: " << time_elapsed_ms << " ms\n";
+    	for (double elem : x1) {
+        	cout << elem << " ";
+    	}
+    	cout << endl;
+    	return 0;
 } 
