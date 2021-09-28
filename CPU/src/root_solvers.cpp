@@ -237,22 +237,21 @@ vector<double> quasi_newton(vector<double>& x0, vector<double> (*f)(vector<doubl
 }
 
 vector<double> newton(vector<double>& x0, vector<double> (*f)(vector<double>)) {
-    int nelem = x0.size();
-    Eigen::VectorXd Jinvf(nelem); 
+	int nelem = x0.size();
+	Eigen::VectorXd Jinvf(nelem); 
 	vector<double> dh(nelem,0);
-    vector<double> x1(nelem, 0);
-    for (int i = 0; i < nelem; ++i) { x1[i] = x0[i]; }
-
-    vector<double> f0(nelem, 0);
-    vector<double> f1(nelem, 0);
-    f0 = f(x0);
+	vector<double> x1(nelem, 0);
+	for (int i = 0; i < nelem; ++i) { x1[i] = x0[i]; }
+	vector<double> f0(nelem, 0);
+	vector<double> f1(nelem, 0);
+	f0 = f(x0);
 	
 	Eigen::VectorXd fa(nelem);
 	for (int i = 0; i < nelem; ++i) {
 		fa(i) = f0[i];
 	}
 
-    Eigen::MatrixXd J(nelem,nelem);
+	Eigen::MatrixXd J(nelem,nelem);
 	Eigen::MatrixXd Jinv(nelem,nelem);
 	
 	double h = 0.001;
@@ -260,44 +259,43 @@ vector<double> newton(vector<double>& x0, vector<double> (*f)(vector<double>)) {
 		dh = vector<double>(nelem, 0);
 		dh[j] = dh[j] + h;
 		for (int i = 0; i < nelem; ++i) {
-            x1[i] = x0[i] + dh[i];
-        }
+            		x1[i] = x0[i] + dh[i];
+        	}
 		f1 = f(x1);
 		for (int i = 0; i < nelem; i++) {
 			J(i,j) = (f1[i] - f0[i]) / h;
 		}
 	}
-	cout << "here0" << endl;
-    double err = 1.0;
-    double sum;
-    int k = 0;
-    do {
-		Jinv = J.inverse();
-        Jinvf = Jinv*fa;
-		cout << "here2" << endl;
-        for (int i = 0; i < nelem; ++i) {
-            x1[i] = x0[i] - Jinvf(i);
-        }
-        f1 = f(x1);
-        
-        sum = 0;
-        for (int i = 0; i < nelem; ++i) {
-            sum += pow(f1[i], 2);
-        }
-        err = sqrt(sum);
-        /*
-        for (double elem : x1) {
-            cout << elem << " ";
-        }
-        cout << endl;
-		*/
-        cout << "k = " << k << "; err = " << err << endl;
 
-        for (int i = 0; i < nelem; ++i) {
-            x0[i] = x1[i];
-            f0[i] = f1[i];
+   	double err = 1.0;
+    	double sum;
+    	int k = 0;
+    	do {
+		Jinv = J.inverse();
+		Jinvf = Jinv*fa;
+        	for (int i = 0; i < nelem; ++i) {
+            		x1[i] = x0[i] - Jinvf(i);
+        	}
+        	f1 = f(x1);
+        
+        	sum = 0;
+        	for (int i = 0; i < nelem; ++i) {
+			sum += pow(f1[i], 2);
+        	}
+        	err = sqrt(sum);
+        	/*
+		for (double elem : x1) {
+			cout << elem << " ";
+		}
+		cout << endl;
+		*/
+		cout << "k = " << k << "; err = " << err << endl;
+
+        	for (int i = 0; i < nelem; ++i) {
+            		x0[i] = x1[i];
+            		f0[i] = f1[i];
 			fa(i) = f0[i];
-        }
+        	}
 		
 		for (int j = 0; j < nelem; j++) {
 			dh = vector<double>(nelem, 0);
