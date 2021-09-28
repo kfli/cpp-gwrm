@@ -1,4 +1,4 @@
-# gwrm
+# GWRM - Generalized Weighted Residual Method
 # Install development tools 
 Ubuntu
 1. $ sudo apt-get update
