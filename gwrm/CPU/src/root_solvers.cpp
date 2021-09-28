@@ -1,7 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
-#include <armadillo>
+#include <Eigen/Dense>
 using namespace std;
 typedef vector< vector<double> > Matrix;
 
@@ -238,8 +238,7 @@ vector<double> quasi_newton(vector<double>& x0, vector<double> (*f)(vector<doubl
 
 vector<double> newton(vector<double>& x0, vector<double> (*f)(vector<double>)) {
     int nelem = x0.size();
-    arma::Mat<double> Jinvf(nelem,0); 
-	arma::Mat<double> fa(nelem,0); 
+    Eigen::VectorXd Jinvf(nelem); 
 	vector<double> dh(nelem,0);
     vector<double> x1(nelem, 0);
     for (int i = 0; i < nelem; ++i) { x1[i] = x0[i]; }
@@ -247,9 +246,14 @@ vector<double> newton(vector<double>& x0, vector<double> (*f)(vector<double>)) {
     vector<double> f0(nelem, 0);
     vector<double> f1(nelem, 0);
     f0 = f(x0);
+	
+	Eigen::VectorXd fa(nelem);
+	for (int i = 0; i < nelem; ++i) {
+		fa(i) = f0[i];
+	}
 
-    arma::Mat<double> J(nelem,nelem);
-	arma::Mat<double> Jinv(nelem,nelem);
+    Eigen::MatrixXd J(nelem,nelem);
+	Eigen::MatrixXd Jinv(nelem,nelem);
 	
 	double h = 0.001;
 	for (int j = 0; j < nelem; j++) {
@@ -268,10 +272,7 @@ vector<double> newton(vector<double>& x0, vector<double> (*f)(vector<double>)) {
     double sum;
     int k = 0;
     do {
-		Jinv = inv(J);
-		for (int i = 0; i < nelem; ++i) {
-            fa(i) = f0[i];
-        }
+		Jinv = J.inverse();
         Jinvf = Jinv*fa;
 		cout << "here2" << endl;
         for (int i = 0; i < nelem; ++i) {
@@ -295,6 +296,7 @@ vector<double> newton(vector<double>& x0, vector<double> (*f)(vector<double>)) {
         for (int i = 0; i < nelem; ++i) {
             x0[i] = x1[i];
             f0[i] = f1[i];
+			fa(i) = f0[i];
         }
 		
 		for (int j = 0; j < nelem; j++) {

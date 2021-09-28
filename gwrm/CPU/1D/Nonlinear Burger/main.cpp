@@ -8,9 +8,9 @@
 using namespace std;
 
 // Define global variables
-int K = 8, L = 8;
+int K = 16, L = 16;
 double Lx = 0, Rx = 1.0;
-double Lt = 0, Rt = 1.0;
+double Lt = 0, Rt = 10.0;
 double BMAx = 0.5 * (Rx - Lx), BPAx = 0.5 * (Rx + Lx);
 double BMAt = 0.5 * (Rt - Lt), BPAt = 0.5 * (Rt + Lt);
 
