@@ -15,7 +15,7 @@ CFLAGS  = -g -Wall -I$(INC_DIR)
 
 CXXFLAGS = -O3 -fopenmp -I$(EIG_DIR)
 
-SRCS = $(SRC_DIR)\root_solvers.cpp
+SRCS = $(SRC_DIR)\root_solvers.cpp 
 
 all: $(TARGET)
 

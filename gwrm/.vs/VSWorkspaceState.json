@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\CPU",
+    "\\CPU\\1D",
+    "\\CPU\\1D\\Nonlinear Burger",
+    "\\GPU"
+  ],
+  "SelectedNode": "\\GPU\\helloworld.cu",
+  "PreviewInSolutionExplorer": false
+}

@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <iostream>
+#include <cuda.h>
+#include <time.h>
+
+
+__global__ void parreduc(int n, float *a, float *b){
+   __syncthreads();
+   constexpr int threadsPerBlock = 1024;
+   extern __shared__ float sdata[threadsPerBlock*sizeof(int)];
+   int i = blockIdx.x*(blockDim.x*2)+threadIdx.x;
+   int tid = threadIdx.x;
+   sdata[tid] = a[i]+a[i+blockDim.x];
+   //__syncthreads();
+   // do reduction in shared mem
+   for (int s=blockDim.x/2; s>0; s>>=1) {
+      if (tid < s) {
+         sdata[tid] += sdata[tid + s];
+      }
+      __syncthreads();
+   }
+   // write result for this block to global mem
+   if (tid == 0) b[blockIdx.x] = sdata[0];
+}
+
+int main(void){
+  clock_t tStart = clock();
+  int N = 100000;
+  float *a, *b, *d_a, *d_b;
+  a = (float*)malloc(N*sizeof(float));
+  b = (float*)malloc(N*sizeof(float));
+
+  cudaMalloc(&d_a, N*sizeof(float));
+  cudaMalloc(&d_b, N*sizeof(float));
+
+  for (int i = 0; i < N; i++) {
+    a[i] = 0.5f;
+  }
+
+  cudaMemcpy(d_a, a, N*sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_b, b, N*sizeof(float), cudaMemcpyHostToDevice);
+
+  unsigned int blockSize, gridSize;
+  // Number of threads in block
+  blockSize = 1024;
+
+  // Number of thread blocks in grid
+  gridSize = (int)ceil((float)N/blockSize);
+
+  std::cout << "blockSize: " << blockSize << "\ngridSize: " << gridSize << "\n";
+
+  // Perform sum on N elements
+  parreduc<<< gridSize, blockSize >>>(N, d_a, d_b);
+  parreduc<<<        1, blockSize >>>(N, d_b, d_b);
+  printf("Time taken: %.2fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
+
+  cudaMemcpy(b, d_b, N*sizeof(float), cudaMemcpyDeviceToHost);
+
+  std::cout << "Vector b: [ ";
+  for (int k = 0; k < 10; ++k)
+    std::cout << b[k] << " ";
+  std::cout <<"]\n";
+
+  cudaFree(d_a);
+  cudaFree(d_b);
+  free(a);
+  free(b);
+}
+
