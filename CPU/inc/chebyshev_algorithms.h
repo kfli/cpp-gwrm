@@ -2,7 +2,7 @@
 #include <omp.h>
 #include <vector>
 #include <tuple>
-#include "..\src\chebyshev_algorithms.cpp"
+#include "../src/chebyshev_algorithms.cpp"
 
 using namespace std;
 typedef vector<vector<double>> Matrix;

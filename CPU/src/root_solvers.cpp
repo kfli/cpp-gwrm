@@ -2,6 +2,7 @@
 #include <math.h>
 #include <vector>
 #include <Eigen/Dense>
+#include <Eigen/LU>
 using namespace std;
 typedef vector< vector<double> > Matrix;
 
@@ -52,6 +53,7 @@ Eigen::VectorXd newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd
     Eigen::VectorXd f1(nelem);
 
 	Eigen::MatrixXd J(nelem,nelem);
+	Eigen::MatrixXd J1(nelem,nelem);
 	
 	f0 = f(x0);
 	double h = 0.001;
@@ -169,7 +171,7 @@ Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(E
     int nelem = x.size();
 	int mk = 0;
 	int mmax = 1000;
-	double beta = 1;
+	double beta = 0.01;
 	Eigen::VectorXd gamma;
     Eigen::MatrixXd D(nelem,0); 
 	Eigen::MatrixXd E(nelem,0); 

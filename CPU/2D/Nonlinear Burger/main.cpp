@@ -4,13 +4,13 @@
 #include <vector>
 #include <iomanip>
 #include <ctime>
-#include "..\..\inc\root_solvers.h"
-#include "..\..\inc\chebyshev_algorithms.h"
+#include "../../inc/root_solvers.h"
+#include "../../inc/chebyshev_algorithms.h"
 using namespace std;
 const double PI = 3.141592653589793238463;
 
 // Define global variables
-int K = 22, L = 22, M = 4;
+int K = 22, L = 22, M = 5;
 int N = (K + 1) * (L + 1) * (M + 1);
 double Lx = 0, Rx = 2.0 * PI;
 double Ly = 0, Ry = 2.0 * PI;
@@ -21,8 +21,8 @@ double BMAy = 0.5 * (Ry - Ly), BPAy = 0.5 * (Ry + Ly);
 double BMAt = 0.5 * (Rt - Lt), BPAt = 0.5 * (Rt + Lt);
 
 // Initial condition
-Matrix init_a(K+1, vector<double>(L+1));
-Matrix init_b(K+1, vector<double>(L+1));
+vector<double> init_a((K + 1) * (L + 1));
+vector<double> init_b((K + 1) * (L + 1));
 
 double u0(double x, double y) {
 	return ( cos(x) + sin(y) );
@@ -175,11 +175,11 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 			for (int j = 0; j < L+1; j++) {
 				sum = 0.5 * a[i][j][0];
 				for (int k = 1; k < M+1; k++) { sum += pow(-1,k) * a[i][j][k]; }
-				fvec(0 * N + i + (K + 1) * ( j + (L + 1) * M )) = sum - init_a[i][j];
+				fvec(0 * N + i + (K + 1) * ( j + (L + 1) * M )) = sum - init_a[i + (K + 1) *  j];
 			
 				sum = 0.5 * b[i][j][0];
 				for (int k = 1; k < M+1; k++) { sum += pow(-1,k) * b[i][j][k]; }
-				fvec(1 * N + i + (K + 1) * ( j + (L + 1) * M )) = sum - init_b[i][j];
+				fvec(1 * N + i + (K + 1) * ( j + (L + 1) * M )) = sum - init_b[i + (K + 1) *  j];
 			}
 		}
 	} else {
@@ -207,8 +207,8 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 		// initial condition: 0th mode
 		for (int i = 0; i < K+1; i++) {
 			for (int j = 0; j < L+1; j++) {
-				fvec(0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec(0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) + 2.0 * init_a[i][j];
-				fvec(1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec(1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) + 2.0 * init_b[i][j];
+				fvec(0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec(0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) + 2.0 * init_a[i + (K + 1) *  j];
+				fvec(1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec(1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) + 2.0 * init_b[i + (K + 1) *  j];
 			}
 		}
     }
@@ -276,11 +276,11 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 			for (int j = 0; j < L+1; j++) {
 				sum = 0.5 * a[i][j][0];
 				for (int k = 1; k < M+1; k++) { sum += pow(-1,k) * a[i][j][k]; }
-				fvec(0 * N + i + (K + 1) * ( j + (L + 1) * M )) = sum - init_a[i][j];
+				fvec(0 * N + i + (K + 1) * ( j + (L + 1) * M )) = sum - init_a[i + (K + 1) *  j];
 			
 				sum = 0.5 * b[i][j][0];
 				for (int k = 1; k < M+1; k++) { sum += pow(-1,k) * b[i][j][k]; }
-				fvec(1 * N + i + (K + 1) * ( j + (L + 1) * M )) = sum - init_b[i][j];
+				fvec(1 * N + i + (K + 1) * ( j + (L + 1) * M )) = sum - init_b[i + (K + 1) *  j];
 			}
 		}
 	} else {
@@ -308,8 +308,8 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 		// initial condition: 0th mode
 		for (int i = 0; i < K+1; i++) {
 			for (int j = 0; j < L+1; j++) {
-				fvec(0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec(0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) + 2.0 * init_a[i][j];
-				fvec(1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec(1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) + 2.0 * init_b[i][j];
+				fvec(0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec(0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) + 2.0 * init_a[i + (K + 1) *  j];
+				fvec(1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec(1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) + 2.0 * init_b[i + (K + 1) *  j];
 			}
 		}
     }
@@ -322,6 +322,7 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 	
 int main()
 {
+	cout << "*** STEP 1: GWRM STARTED *** \n";
 	int num_eq = 2;
 	int nelem = num_eq * (K + 1) * (L + 1) * (M + 1);
     Eigen::VectorXd x0 = Eigen::VectorXd::Zero(nelem);
@@ -334,20 +335,23 @@ int main()
 	
 	for (int i = 0; i < K+1; i++) {
 		for (int j = 0; j < L+1; j++) {
-			x0(0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_a[i][j];
-			x0(1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_b[i][j];
+			x0(0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_a[i + (K + 1) *  j];
+			x0(1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_b[i + (K + 1) *  j];
 		}
     }
-	
+	cout << "*** STEP 1.5: START CLOCK *** \n";
     clock_t c_start = clock();
+
+	cout << "*** STEP 2: SOLVER STARTED *** \n";
 	//x1 = newton(x0, gwrm);
+
 	
 	Eigen::VectorXd dh(nelem);
 	Eigen::VectorXd f0(nelem);
 	Eigen::VectorXd f1(nelem);
 	Eigen::MatrixXd H = Eigen::MatrixXd::Zero(nelem,nelem);
 	f0 = gwrm_linear(x0);
-	double h = 0.001;
+	double h = 0.01;
 	for (int j = 0; j < nelem; j++) {
 		dh = Eigen::VectorXd::Zero(nelem);
 		dh(j) = h;
@@ -357,14 +361,13 @@ int main()
 			H(i,j) = (f1(i) - f0(i)) / h;
 		}
 	}
+	//Eigen::MatrixXd H = Eigen::MatrixXd::Zero(nelem,nelem);
+	//for (int j = 0; j < nelem; j++) {
+	//	H(j,j) = 1.0;
+	//}
+	cout << "*** STEP 2: CALC INV ***";
 	H = H.inverse();
 	
-	/*
-	Eigen::MatrixXd H = Eigen::MatrixXd::Zero(nelem,nelem);
-	for (int j = 0; j < nelem; j++) {
-		H(j,j) = 1.0;
-	}
-	*/
 	x1 = quasi_newton(x0, gwrm, H);
 	
 	

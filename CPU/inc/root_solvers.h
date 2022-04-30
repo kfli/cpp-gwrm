@@ -1,7 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
-#include "..\src\root_solvers.cpp"
+#include "../src/root_solvers.cpp"
 
 using namespace std;
 typedef vector< vector<double> > Matrix;

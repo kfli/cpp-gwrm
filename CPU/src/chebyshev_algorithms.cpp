@@ -8,21 +8,22 @@ typedef vector<vector<double>> Matrix;
 typedef vector<vector<vector<double>>> Array3D;
 typedef vector<vector<vector<vector<double>>>> Array4D;
 
+
 /* ------------------------------------------- */
 /*  functions that use flattened Malloc arrays */
 /* ------------------------------------------- */
 tuple<double, double> echebser1(double x, vector<double>& a) {
 
-	nelem = size(a);
-	b0 = a[nelem];
-	b1 = 0.0;
-	b2 = 0.0;
+	int nelem = a.size();
+	double b0 = a[nelem];
+	double b1 = 0.0;
+	double b2 = 0.0;
 
-	c0 = a[nelem];
-	c1 = 0.0;
-	c2 = 0.0;
+	double c0 = a[nelem];
+	double c1 = 0.0;
+	double c2 = 0.0;
 
-	x2 = 2.0 * x;
+	double x2 = 2.0 * x;
 
 	for (int i = nelem - 1; i > 0; i--) {
 		b2 = b1;
@@ -36,10 +37,10 @@ tuple<double, double> echebser1(double x, vector<double>& a) {
 		}
 	}
 
-	y0 = 0.5 * ( b0 - b2 );
-	y1 = c0 - c2;
+	double y0 = 0.5 * ( b0 - b2 );
+	double y1 = 2.0 * ( c0 - c2 );
 
-	return {y0, y1};
+	return std::make_tuple(y0, y1);
 }
 
 void chebyshev_coefficients_2D(int M, int N, double (*func)(double, double), vector<double>& c, double BMA1, double BPA1, double BMA2, double BPA2) {
@@ -60,7 +61,7 @@ void chebyshev_coefficients_2D(int M, int N, double (*func)(double, double), vec
 					sum += cfac[k][l] * cos(PI * i * (k + 0.5) / M) * cos(PI * j * (l + 0.5) / N);
 				}
 			}
-		c[i + K * j] = (2.0 / M) * (2.0 / N) * sum;
+		c[i + M * j] = (2.0 / M) * (2.0 / N) * sum;
 		}
 	}
 }

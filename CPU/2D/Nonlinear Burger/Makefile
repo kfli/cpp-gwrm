@@ -1,9 +1,9 @@
 # The build target 
-TARGET = main_multidomain
-INC_DIR = ..\..\inc
-SRC_DIR = ..\..\src
-DEPS = $(INC_DIR)\root_solvers.h
-EIG_DIR = \Eigen\eigen-3.4.0\
+TARGET = main
+INC_DIR = ../../inc
+SRC_DIR = ../../src
+DEPS = $(INC_DIR)/root_solvers.h
+EIG_DIR = /usr/local/include/eigen-3.4.0/
 
 # the compiler: gcc for C program, define as g++ for C++
 CC = g++
@@ -14,7 +14,7 @@ CC = g++
 CFLAGS  = -g -Wall -I$(INC_DIR)
 
 CXXFLAGS = -O3 -fopenmp -I$(EIG_DIR)
-SRCS = $(SRC_DIR)\root_solvers.cpp 
+SRCS = $(SRC_DIR)/root_solvers.cpp 
 
 all: $(TARGET)
 
