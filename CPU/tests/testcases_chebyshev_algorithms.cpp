@@ -6,6 +6,8 @@
 #include "..\inc\chebyshev_algorithms.h"
 
 int main(void) {
+	
+	double ATEST[2][2] = vector< vector<double> >(2,2);
     
     int xM = 200, yM = 200, zM = 5;
     int M = (xM + 1) * (yM + 1);

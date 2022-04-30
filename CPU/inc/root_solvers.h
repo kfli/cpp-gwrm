@@ -6,22 +6,12 @@
 using namespace std;
 typedef vector< vector<double> > Matrix;
 
-Matrix matrix_sum(const Matrix& a, const Matrix& b);
+Eigen::VectorXd quasi_newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd), Eigen::MatrixXd& H);
 
-vector<double> matrix_vector_mult(const Matrix& a, const vector<double>& b);
+Eigen::VectorXd newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd));
 
-Matrix matrix_matrix_mult(const Matrix& a, const Matrix& b);
+Eigen::VectorXd AMFA(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd));
 
-double det(const Matrix& vect);
+Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd));
 
-Matrix transpose(const Matrix& matrix1);
-
-Matrix cofactor(const Matrix& vect);
-
-Matrix inverse(const Matrix A);
-
-void bad_broyden_update(Matrix& H, const vector<double>& s, const vector<double>& y);
-
-vector<double> quasi_newton(vector<double>& x0, vector<double> (*f)(vector<double>));
-
-vector<double> newton(vector<double>& x0, vector<double> (*f)(vector<double>));
+Eigen::VectorXd anderson_picard_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(Eigen::VectorXd));

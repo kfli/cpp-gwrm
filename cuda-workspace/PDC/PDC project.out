@@ -1,9 +1,0 @@
-\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
-\BOOKMARK [1][-]{section.2}{GWRM: A Time-Spectral Method}{}% 2
-\BOOKMARK [2][-]{subsection.2.1}{Basic formulation}{section.2}% 3
-\BOOKMARK [2][-]{subsection.2.2}{Chebyshev product}{section.2}% 4
-\BOOKMARK [1][-]{section.3}{Cuda Toolkit}{}% 5
-\BOOKMARK [2][-]{subsection.3.1}{Kernels}{section.3}% 6
-\BOOKMARK [1][-]{section.4}{Results}{}% 7
-\BOOKMARK [1][-]{section.5}{Discussion}{}% 8
-\BOOKMARK [1][-]{section.6}{Conclusion}{}% 9
