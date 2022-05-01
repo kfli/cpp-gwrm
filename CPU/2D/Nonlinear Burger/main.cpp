@@ -14,7 +14,7 @@ int K = 22, L = 22, M = 5;
 int N = (K + 1) * (L + 1) * (M + 1);
 double Lx = 0, Rx = 2.0 * PI;
 double Ly = 0, Ry = 2.0 * PI;
-double Lt = 0, Rt = 1.0;
+double Lt = 0, Rt = 0.01;
 
 double BMAx = 0.5 * (Rx - Lx), BPAx = 0.5 * (Rx + Lx);
 double BMAy = 0.5 * (Ry - Ly), BPAy = 0.5 * (Ry + Ly);
@@ -156,7 +156,7 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 	
 	// du/dt - nu.( du2/dx2 +  du2/dy2 ) = 0
 	// dv/dt - nu.( dv2/dx2 +  dv2/dy2 ) = 0
-	double nu = 0.05;
+	double nu = 0.03;
 	if (!is_integration) {
 		chebyshev_z_derivative_3D_array(K, L, M, a, at, BMAt);
 		chebyshev_z_derivative_3D_array(K, L, M, b, bt, BMAt);
@@ -220,10 +220,10 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 
 // GWRM function
 Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
-    int nelem = x.size();
+    	int nelem = x.size();
 	double sum;
 	bool is_integration = false;
-    Eigen::VectorXd fvec = Eigen::VectorXd::Zero(nelem);
+    	Eigen::VectorXd fvec = Eigen::VectorXd::Zero(nelem);
 	Array3D a(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));
 	Array3D b(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));
 	
@@ -234,7 +234,7 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 				b[i][j][k] = x(1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 			}
 		}
-    }
+    	}
 	
 	// derivatives
 	Array3D ax(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));  chebyshev_x_derivative_3D_array(K, L, M, a, ax, BMAx);
@@ -257,7 +257,7 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 
 	// du/dt + u.du/dx + v.du/dy - nu.( du2/dx2 +  du2/dy2 ) = 0
 	// dv/dt + u.dv/dx + v.dv/dy - nu.( dv2/dx2 +  dv2/dy2 ) = 0
-	double nu = 0.05;
+	double nu = 0.03;
 	if (!is_integration) {
 		chebyshev_z_derivative_3D_array(K, L, M, a, at, BMAt);
 		chebyshev_z_derivative_3D_array(K, L, M, b, bt, BMAt);
@@ -325,12 +325,12 @@ int main()
 	cout << "*** STEP 1: GWRM STARTED *** \n";
 	int num_eq = 2;
 	int nelem = num_eq * (K + 1) * (L + 1) * (M + 1);
-    Eigen::VectorXd x0 = Eigen::VectorXd::Zero(nelem);
-    Eigen::VectorXd x1(nelem);
+    	Eigen::VectorXd x0 = Eigen::VectorXd::Zero(nelem);
+    	Eigen::VectorXd x1(nelem);
 	vector<double> a((K + 1) * (L + 1) * (M + 1));
 	vector<double> b((K + 1) * (L + 1) * (M + 1));
 	
-	chebyshev_coefficients_2D(K+1, L+1, u0, init_a, BMAx, BPAx, BMAy, BPAy);
+	chebyshev_coefficients_2D(K+1, L+1, u0, +, BMAx, BPAx, BMAy, BPAy);
 	chebyshev_coefficients_2D(K+1, L+1, v0, init_b, BMAx, BPAx, BMAy, BPAy);
 	
 	for (int i = 0; i < K+1; i++) {
@@ -338,14 +338,14 @@ int main()
 			x0(0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_a[i + (K + 1) *  j];
 			x0(1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_b[i + (K + 1) *  j];
 		}
-    }
+    	}
 	cout << "*** STEP 1.5: START CLOCK *** \n";
-    clock_t c_start = clock();
+    	clock_t c_start = clock();
 
 	cout << "*** STEP 2: SOLVER STARTED *** \n";
 	//x1 = newton(x0, gwrm);
 
-	
+	/*
 	Eigen::VectorXd dh(nelem);
 	Eigen::VectorXd f0(nelem);
 	Eigen::VectorXd f1(nelem);
@@ -361,18 +361,20 @@ int main()
 			H(i,j) = (f1(i) - f0(i)) / h;
 		}
 	}
-	//Eigen::MatrixXd H = Eigen::MatrixXd::Zero(nelem,nelem);
-	//for (int j = 0; j < nelem; j++) {
-	//	H(j,j) = 1.0;
-	//}
-	cout << "*** STEP 2: CALC INV ***";
-	H = H.inverse();
 	
-	x1 = quasi_newton(x0, gwrm, H);
+	Eigen::MatrixXd H = Eigen::MatrixXd::Zero(nelem,nelem);
+	for (int j = 0; j < nelem; j++) {
+		H(j,j) = -1.0;
+	}
+	cout << "*** STEP 2: CALC INV ***";
+	//H = H.inverse();
+	
+	//x1 = quasi_newton(x0, gwrm, H);
+	*/
 	
 	
 	//x1 = AMFA(x0, gwrm);
-	//x1 = anderson_acceleration(x0, gwrm);
+	x1 = anderson_acceleration(x0, gwrm);
 	//x1 = anderson_picard_acceleration(x0, gwrm);
     clock_t c_end = clock();
     long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;

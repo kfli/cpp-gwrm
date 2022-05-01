@@ -53,6 +53,7 @@ void chebyshev_coefficients_2D(int M, int N, double (*func)(double, double), vec
 		}
 	}
 	double sum;
+#pragma omp parallel for private(sum) collapse(2)
 	for (int i = 0; i < M; i++) {
 		for (int j = 0; j < N; j++) {
 			sum = 0;
@@ -62,6 +63,35 @@ void chebyshev_coefficients_2D(int M, int N, double (*func)(double, double), vec
 				}
 			}
 		c[i + M * j] = (2.0 / M) * (2.0 / N) * sum;
+		}
+	}
+}
+
+void chebyshev_coefficients_2D(int M, int N, int sx, int sy,
+				int Nx, Ny, int N,
+				double (*func)(double, double), 
+				vector<double>& c, 
+				double BMA1, double BPA1, 
+				double BMA2, double BPA2) {
+	const double PI = 3.141592653589793238463;
+	Matrix cfac(M, vector<double>(N));
+
+	for (int k = 0; k < M; k++) {
+		for (int l = 0; l < N; l++) {
+			cfac[k][l] = func(cos(PI * (k + 0.5) / M) * BMA1 + BPA1, cos(PI * (l + 0.5) / N) * BMA2 + BPA2);
+		}
+	}
+	double sum;
+#pragma omp parallel for private(sum) collapse(2)
+	for (int i = 0; i < M; i++) {
+		for (int j = 0; j < N; j++) {
+			sum = 0;
+			for (int k = 0; k < M; k++) {
+				for (int l = 0; l < N; l++) {
+					sum += cfac[k][l] * cos(PI * i * (k + 0.5) / M) * cos(PI * j * (l + 0.5) / N);
+				}
+			}
+		c[(((sy - 1) + (sx - 1) * Nx) * N + i + M * j] = (2.0 / M) * (2.0 / N) * sum;
 		}
 	}
 }

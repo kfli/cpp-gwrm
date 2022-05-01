@@ -171,7 +171,7 @@ Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(E
     int nelem = x.size();
 	int mk = 0;
 	int mmax = 1000;
-	double beta = 0.01;
+	double beta = 0.001;
 	Eigen::VectorXd gamma;
     Eigen::MatrixXd D(nelem,0); 
 	Eigen::MatrixXd E(nelem,0); 
@@ -232,9 +232,9 @@ Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(E
 			} 
 			gamma = D.colPivHouseholderQr().solve(f0);
 			/* QR decomposition */
-			x0 = g0 - E * gamma;
+			//x0 = g0 - E * gamma;
 			/* SVD */
-			//x0 = g0 - E*D.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(f0);
+			x0 = g0 - E*D.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(f0);
 			if (beta > 0 && beta < 1) {
 				x0 = x0 - (1 - beta) * (f0 - D * gamma);
 			}

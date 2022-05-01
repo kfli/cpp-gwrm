@@ -12,6 +12,8 @@ const double PI = 3.141592653589793238463;
 // Define global variables
 int K = 5, L = 5, M = 4;
 int N = (K + 1) * (L + 1) * (M + 1);
+int Ne = 2;
+int Nt = N * Ne;
 int Nx = 3, Ny = 3;
 double Lx = 0, Rx = 2.0 * PI;
 double Ly = 0, Ry = 2.0 * PI;
@@ -53,9 +55,9 @@ double eval_chebyshev_series(const vector<double> x, const double xp, const doub
 	vector<double> Ty(L);
 	vector<double> Tt(M);
 	fp[0] = fp[0]/2;
-	Tx = chebyshev_polynomials( (xp - BMAx)/BPAx, K );
-	Ty = chebyshev_polynomials( (yp - BMAy)/BPAy, L );
-	Tt = chebyshev_polynomials( (tp - BMAt)/BPAt, M );
+	Tx = chebyshev_polynomials( (xp - BPAx)/BMAx, K );
+	Ty = chebyshev_polynomials( (yp - BPAy)/BMAy, L );
+	Tt = chebyshev_polynomials( (tp - BPAt)/BMAt, M );
 	double sum = 0;
 	for (int i = 0; i < K+1; i++) {
 		for (int j = 0; j < L+1; j++) {
@@ -69,7 +71,7 @@ double eval_chebyshev_series(const vector<double> x, const double xp, const doub
 
 // GWRM function
 Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
-    int nelem = x.size();
+    	int nelem = x.size();
 	double sum;
 	double al_sol_right, al_sol_left, ac_sol_left, ac_sol_right, ar_sol_left, ar_sol_right;
 	double al_der_right, al_der_left, ac_der_left, ac_der_right, ar_der_left, ar_der_right;
@@ -82,7 +84,7 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 	vector<double> bc_tmp((K + 1));
 	vector<double> br_tmp((K + 1));
 	bool is_integration = false;
-    Eigen::VectorXd fvec = Eigen::VectorXd::Zero(nelem);
+    	Eigen::VectorXd fvec = Eigen::VectorXd::Zero(nelem);
 	Array3D a = Array3D(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));
 	Array3D b = Array3D(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));
 	
@@ -477,32 +479,33 @@ int main()
 	int num_eq = 2;
 	int num_sub = num_eq * (K + 1) * (L + 1) * (M + 1);
 	int nelem = Nx * Ny * num_eq * (K + 1) * (L + 1) * (M + 1);
-    Eigen::VectorXd x0 = Eigen::VectorXd::Zero(nelem);
-    Eigen::VectorXd x1(nelem);
+	
+    	Eigen::VectorXd x0 = Eigen::VectorXd::Zero(nelem);
+    	Eigen::VectorXd x1(nelem);
 	vector<double> a((K + 1) * (L + 1) * (M + 1));
 	vector<double> b((K + 1) * (L + 1) * (M + 1));
 	
-	for (int i = 1; i < Nx+1; i++) {
-		for (int j = 1; j < Ny+1; j++) {
-			chebyshev_coefficients_2D(K+1, L+1, u0, init_a[i][j], BMAx[i], BPAx[i], BMAy[j], BPAy[j]);
-			chebyshev_coefficients_2D(K+1, L+1, v0, init_b[i][j], BMAx[i], BPAx[i], BMAy[j], BPAy[j]);
+	for (int sx = 1; i < Nx+1; sx++) {
+		for (int sy = 1; j < Ny+1; sy++) {
+			chebyshev_coefficients_2D(K+1, L+1, sx, sy, Nx, Ny, N, u0, init_as, BMAx[i], BPAx[i], BMAy[j], BPAy[j]);
+			chebyshev_coefficients_2D(K+1, L+1, sx, sy, Nx, Ny, N, v0, init_bs, BMAx[i], BPAx[i], BMAy[j], BPAy[j]);
 		}
 	}
 	
 	for (int sx = 0; sx < Nx; sx++) {
-		for (int sy = 0; sy < Ny; sx++) {
+		for (int sy = 0; sy < Ny; sy++) {
 			for (int i = 0; i < K+1; i++) {
 				for (int j = 0; j < L+1; j++) {
-					x0((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_a[sx][sy][i][j];
-					x0((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_b[sx][sy][i][j];
+					x0((sx + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_as[(sx + Nx * sy) * num_sub + i + K * j];
+					x0((sx + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_bs[(sx + Nx * sy) * num_sub + i + K * j];
 				}
 			}
 		}
-    }
+    	}
 	
-    clock_t c_start = clock();
+    	clock_t c_start = clock();
 	//x1 = newton(x0, gwrm);
-	
+	/*
 	Eigen::VectorXd dh(nelem);
 	Eigen::VectorXd f0(nelem);
 	Eigen::VectorXd f1(nelem);
@@ -520,7 +523,7 @@ int main()
 	}
 	H = H.inverse();
 	
-	/*
+	
 	Eigen::MatrixXd H = Eigen::MatrixXd::Zero(nelem,nelem);
 	for (int j = 0; j < nelem; j++) {
 		H(j,j) = 1.0;
@@ -530,11 +533,11 @@ int main()
 	
 	
 	//x1 = AMFA(x0, gwrm);
-	//x1 = anderson_acceleration(x0, gwrm);
+	x1 = anderson_acceleration(x0, gwrm);
 	//x1 = anderson_picard_acceleration(x0, gwrm);
-    clock_t c_end = clock();
-    long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
-    cout << "CPU time used: " << time_elapsed_ms << " ms\n";
+    	clock_t c_end = clock();
+    	long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
+    	cout << "CPU time used: " << time_elapsed_ms << " ms\n";
 	
 	vector<double> sigma(K+1,1);
 	vector<double> cutoff(K+1,1);
