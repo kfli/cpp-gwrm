@@ -68,7 +68,7 @@ void chebyshev_coefficients_2D(int M, int N, double (*func)(double, double), vec
 }
 
 void chebyshev_coefficients_2D(int M, int N, int sx, int sy,
-				int Nx, Ny, int N,
+				int Nx, int Ny, int Nm,
 				double (*func)(double, double), 
 				vector<double>& c, 
 				double BMA1, double BPA1, 
@@ -91,7 +91,7 @@ void chebyshev_coefficients_2D(int M, int N, int sx, int sy,
 					sum += cfac[k][l] * cos(PI * i * (k + 0.5) / M) * cos(PI * j * (l + 0.5) / N);
 				}
 			}
-		c[(((sy - 1) + (sx - 1) * Nx) * N + i + M * j] = (2.0 / M) * (2.0 / N) * sum;
+		c[((sy - 1) + (sx - 1) * Nx) * Nm + i + M * j] = (2.0 / M) * (2.0 / N) * sum;
 		}
 	}
 }

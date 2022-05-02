@@ -36,7 +36,7 @@ void chebyshev_coefficients_2D_array(int M, double (*f)(double),  vector<double>
 
 void chebyshev_coefficients_2D(int M, int N, double (*func)(double, double), vector<double>& c, double BMA1, double BPA1, double BMA2, double BPA2);
 
-void chebyshev_coefficients_2D(int M, int N, int sx, int sy, int Nx, Ny, int N, double (*func)(double, double), vector<double>& c, double BMA1, double BPA1, double BMA2, double BPA2);
+void chebyshev_coefficients_2D(int M, int N, int sx, int sy, int Nx, int Ny, int Nm, double (*func)(double, double), vector<double>& c, double BMA1, double BPA1, double BMA2, double BPA2);
 	
 void chebyshev_x_derivative_1D_array(int l, vector<double> &a, vector<double> &b, double BMAx);
 
