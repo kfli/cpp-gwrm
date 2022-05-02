@@ -10,14 +10,14 @@ using namespace std;
 const double PI = 3.141592653589793238463;
 
 // Define global variables
-int K = 5, L = 5, M = 4;
+int K = 5, L = 5, M = 5;
 int N = (K + 1) * (L + 1) * (M + 1);
 int Ne = 2;
 int Nt = N * Ne;
-int Nx = 3, Ny = 3;
+int Nx = 1, Ny = 1;
 double Lx = 0, Rx = 2.0 * PI;
 double Ly = 0, Ry = 2.0 * PI;
-double Lt = 0, Rt = 2.0;
+double Lt = 0, Rt = 0.01;
 
 vector<double> x_grid(Nx+1);
 vector<double> y_grid(Ny+1);
@@ -49,8 +49,8 @@ vector<double> chebyshev_polynomials(double x, int n) {
 }
 
 double eval_chebyshev_series(const vector<double> x, const double xp, const double yp, const double tp) {
-	int nelem = x.size();
-	vector<double> fp(nelem,1);
+	int Nt = x.size();
+	vector<double> fp(Nt,1);
 	vector<double> Tx(K);
 	vector<double> Ty(L);
 	vector<double> Tt(M);
@@ -69,9 +69,9 @@ double eval_chebyshev_series(const vector<double> x, const double xp, const doub
 	return sum;
 }
 
-// GWRM function
+// GWRM linear function
 Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
-    	int nelem = x.size();
+    	int Nt = x.size();
 	double sum;
 	double al_sol_right, al_sol_left, ac_sol_left, ac_sol_right, ar_sol_left, ar_sol_right;
 	double al_der_right, al_der_left, ac_der_left, ac_der_right, ar_der_left, ar_der_right;
@@ -84,7 +84,7 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 	vector<double> bc_tmp((K + 1));
 	vector<double> br_tmp((K + 1));
 	bool is_integration = false;
-    	Eigen::VectorXd fvec = Eigen::VectorXd::Zero(nelem);
+    	Eigen::VectorXd fvec = Eigen::VectorXd::Zero(Nt);
 	Array3D a = Array3D(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));
 	Array3D b = Array3D(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));
 	
@@ -93,8 +93,8 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 			for (int i = 0; i < K+1; i++) {
 				for (int j = 0; j < L+1; j++) {
 					for (int k = 0; k < M+1; k++) {
-						a[0 * N + i + (K + 1) * ( j + (L + 1) * k )] = x((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-						b[1 * N + i + (K + 1) * ( j + (L + 1) * k )] = x((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						a[0 * N + i + (K + 1) * ( j + (L + 1) * k )] = x((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						b[1 * N + i + (K + 1) * ( j + (L + 1) * k )] = x((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 					}	
 				}
 			}
@@ -122,8 +122,8 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 				for (int i = 0; i < K-1; i++) {
 					for (int j = 0; j < L-1; j++) {
 						for (int k = 0; k < M; k++) {
-								fvec((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k )) = at[i][j][k] - nu * (axx[i][j][k] + ayy[i][j][k]);
-								fvec((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k )) = bt[i][j][k] - nu * (bxx[i][j][k] + byy[i][j][k]);
+								fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k )) = at[i][j][k] - nu * (axx[i][j][k] + ayy[i][j][k]);
+								fvec((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k )) = bt[i][j][k] - nu * (bxx[i][j][k] + byy[i][j][k]);
 						}
 					}
 				}
@@ -156,8 +156,8 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 				for (int i = 0; i < K-1; i++) {
 					for (int j = 0; j < L-1; j++) {
 						for (int k = 0; k < M + 1; k++) {
-								fvec((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k )) = ai[i][j][k] - a[i][j][k];
-								fvec((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k )) = bi[i][j][k] - b[i][j][k];
+								fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k )) = ai[i][j][k] - a[i][j][k];
+								fvec((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k )) = bi[i][j][k] - b[i][j][k];
 						}
 					}
 				}
@@ -166,9 +166,9 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 				// initial condition: 0th mode
 				for (int i = 0; i < K+1; i++) {
 					for (int j = 0; j < L+1; j++) {
-						fvec((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) 
+						fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) 
 							+ 2.0 * init_as[(sx + Nx * sy ) * (K + 1) * (L + 1) + i + K * j];
-						fvec((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) 
+						fvec((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) 
 							+ 2.0 * init_bs[(sx + Nx * sy ) * (K + 1) * (L + 1) + i + K * j];
 					}
 				}
@@ -182,23 +182,23 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 			for (int j = 0; j < L+1; j++) {
 				for (int k = 0; k < M+1; k++) {
 					for (int i = 0; i < K+1; i++) {
-						ac_tmp[i] = x((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-						bc_tmp[i] = x((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						ac_tmp[i] = x((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						bc_tmp[i] = x((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						if (sx == 0) {
-							al_tmp[i] = x((Nx - 1 + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							bl_tmp[i] = x((Nx - 1 + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							ar_tmp[i] = x((sx + 1 + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							br_tmp[i] = x((sx + 1 + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							al_tmp[i] = x((Nx - 1 + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							bl_tmp[i] = x((Nx - 1 + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							ar_tmp[i] = x((sx + 1 + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							br_tmp[i] = x((sx + 1 + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						} else if ( sx == Nx - 1) {
-							al_tmp[i] = x((sx - 1 + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							bl_tmp[i] = x((sx - 1 + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							ar_tmp[i] = x((sx + 1 + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							br_tmp[i] = x((sx + 1 + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							al_tmp[i] = x((sx - 1 + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							bl_tmp[i] = x((sx - 1 + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							ar_tmp[i] = x((sx + 1 + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							br_tmp[i] = x((sx + 1 + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						} else {
-							al_tmp[i] = x((sx - 1 + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							bl_tmp[i] = x((sx - 1 + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							ar_tmp[i] = x((0 + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							br_tmp[i] = x((0 + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							al_tmp[i] = x((sx - 1 + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							bl_tmp[i] = x((sx - 1 + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							ar_tmp[i] = x((0 + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							br_tmp[i] = x((0 + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						}
 					}
 					double [al_sol_right, al_der_right] = echebser1(1.0, al_tmp);
@@ -206,16 +206,16 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 					double [ac_sol_right, ac_der_right] = echebser1(1.0, ac_tmp);
 					double [ar_sol_left, ar_der_left] = echebser1(-1.0, ar_tmp);
 
-					fvec((sx + Nx * sy ) * num_sub + 0 * N + K + (K + 1) * ( j + (L + 1) * 0 )) = ac_sol_left - al_sol_right;
-					fvec((sx + Nx * sy ) * num_sub + 0 * N + (K - 1) + (K + 1) * ( j + (L + 1) * 0 )) = ac_der_right - ar_der_left;
+					fvec((sx + Nx * sy ) * Nm + 0 * N + K + (K + 1) * ( j + (L + 1) * 0 )) = ac_sol_left - al_sol_right;
+					fvec((sx + Nx * sy ) * Nm + 0 * N + (K - 1) + (K + 1) * ( j + (L + 1) * 0 )) = ac_der_right - ar_der_left;
 						
 					double [bl_sol_right, bl_der_right] = echebser1(1.0, bl_tmp);
 					double [bc_sol_left, bc_der_left] = echebser1(-1.0, bc_tmp);
 					double [bc_sol_right, bc_der_right] = echebser1(1.0, bc_tmp);
 					double [br_sol_left, br_der_left] = echebser1(-1.0, br_tmp);
 
-					fvec((sx + Nx * sy ) * num_sub + 1 * N + K + (K + 1) * ( j + (L + 1) * 0 )) = bc_sol_left - bl_sol_right;
-					fvec((sx + Nx * sy ) * num_sub + 1 * N + (K - 1) + (K + 1) * ( j + (L + 1) * 0 )) = bc_der_right - br_der_left;
+					fvec((sx + Nx * sy ) * Nm + 1 * N + K + (K + 1) * ( j + (L + 1) * 0 )) = bc_sol_left - bl_sol_right;
+					fvec((sx + Nx * sy ) * Nm + 1 * N + (K - 1) + (K + 1) * ( j + (L + 1) * 0 )) = bc_der_right - br_der_left;
 				}
 			}
 			
@@ -223,23 +223,23 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 			for (int i = 0; i < K+1; i++) {
 				for (int k = 0; k < M+1; k++) {
 					for (int j = 0; j < L+1; j++) {
-						ac_tmp[j] = x((sx + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-						bc_tmp[j] = x((sx + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						ac_tmp[j] = x((sx + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						bc_tmp[j] = x((sx + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						if (sy == 0) {
-							al_tmp[j] = x((sx + Nx * (Ny - 1)) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							bl_tmp[j] = x((sx + Nx * (Ny - 1)) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							ar_tmp[j] = x((sx + Nx * (sy + 1)) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							br_tmp[j] = x((sx + Nx * (sy + 1)) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							al_tmp[j] = x((sx + Nx * (Ny - 1)) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							bl_tmp[j] = x((sx + Nx * (Ny - 1)) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							ar_tmp[j] = x((sx + Nx * (sy + 1)) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							br_tmp[j] = x((sx + Nx * (sy + 1)) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						} else if ( sy == Ny - 1) {
-							al_tmp[j] = x((sx + Nx * (sy - 1)) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							bl_tmp[j] = x((sx + Nx * (sy - 1)) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							ar_tmp[j] = x((sx + Nx * (sy + 1)) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							br_tmp[j] = x((sx + Nx * (sy + 1)) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							al_tmp[j] = x((sx + Nx * (sy - 1)) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							bl_tmp[j] = x((sx + Nx * (sy - 1)) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							ar_tmp[j] = x((sx + Nx * (sy + 1)) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							br_tmp[j] = x((sx + Nx * (sy + 1)) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						} else {
-							al_tmp[j] = x((sx + Nx * (sy - 1) ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							bl_tmp[j] = x((sx + Nx * (sy - 1) ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							ar_tmp[j] = x((sx + Nx * 0 ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							br_tmp[j] = x((sx + Nx * 0 ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							al_tmp[j] = x((sx + Nx * (sy - 1) ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							bl_tmp[j] = x((sx + Nx * (sy - 1) ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							ar_tmp[j] = x((sx + Nx * 0 ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							br_tmp[j] = x((sx + Nx * 0 ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						}
 					}
 					double [al_sol_right, al_der_right] = echebser1(1.0, al_tmp);
@@ -247,16 +247,16 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 					double [ac_sol_right, ac_der_right] = echebser1(1.0, ac_tmp);
 					double [ar_sol_left, ar_der_left] = echebser1(-1.0, ar_tmp);
 
-					fvec((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( L + (L + 1) * 0 )) = ac_sol_left - al_sol_right;
-					fvec((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( (L - 1) + (L + 1) * 0 )) = ac_der_right - ar_der_left;
+					fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( L + (L + 1) * 0 )) = ac_sol_left - al_sol_right;
+					fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( (L - 1) + (L + 1) * 0 )) = ac_der_right - ar_der_left;
 						
 					double [bl_sol_right, bl_der_right] = echebser1(1.0, bl_tmp);
 					double [bc_sol_left, bc_der_left] = echebser1(-1.0, bc_tmp);
 					double [bc_sol_right, bc_der_right] = echebser1(1.0, bc_tmp);
 					double [br_sol_left, br_der_left] = echebser1(-1.0, br_tmp);
 
-					fvec((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( L + (L + 1) * 0 )) = bc_sol_left - bl_sol_right;
-					fvec((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( (L - 1) + (L + 1) * 0 )) = bc_der_right - br_der_left;
+					fvec((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( L + (L + 1) * 0 )) = bc_sol_left - bl_sol_right;
+					fvec((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( (L - 1) + (L + 1) * 0 )) = bc_der_right - br_der_left;
 				}
 				}
 			}
@@ -268,7 +268,7 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 
 // GWRM function
 Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
-    int nelem = x.size();
+    int Nt = x.size();
 	double sum;
 	double al_sol_right, al_sol_left, ac_sol_left, ac_sol_right, ar_sol_left, ar_sol_right;
 	double al_der_right, al_der_left, ac_der_left, ac_der_right, ar_der_left, ar_der_right;
@@ -281,7 +281,7 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 	vector<double> bc_tmp((K + 1));
 	vector<double> br_tmp((K + 1));
 	bool is_integration = false;
-    Eigen::VectorXd fvec = Eigen::VectorXd::Zero(nelem);
+    Eigen::VectorXd fvec = Eigen::VectorXd::Zero(Nt);
 	Array3D a = Array3D(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));
 	Array3D b = Array3D(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));
 	
@@ -290,8 +290,8 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 			for (int i = 0; i < K+1; i++) {
 				for (int j = 0; j < L+1; j++) {
 					for (int k = 0; k < M+1; k++) {
-						a[0 * N + i + (K + 1) * ( j + (L + 1) * k )] = x((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-						b[1 * N + i + (K + 1) * ( j + (L + 1) * k )] = x((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						a[0 * N + i + (K + 1) * ( j + (L + 1) * k )] = x((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						b[1 * N + i + (K + 1) * ( j + (L + 1) * k )] = x((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 					}	
 				}
 			}
@@ -325,8 +325,8 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 				for (int i = 0; i < K-1; i++) {
 					for (int j = 0; j < L-1; j++) {
 						for (int k = 0; k < M; k++) {
-								fvec((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k )) = at[i][j][k] + a_ax[i][j][k] + b_ay[i][j][k] - nu * (axx[i][j][k] + ayy[i][j][k]);
-								fvec((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k )) = bt[i][j][k] + a_bx[i][j][k] + b_by[i][j][k] - nu * (bxx[i][j][k] + byy[i][j][k]);
+								fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k )) = at[i][j][k] + a_ax[i][j][k] + b_ay[i][j][k] - nu * (axx[i][j][k] + ayy[i][j][k]);
+								fvec((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k )) = bt[i][j][k] + a_bx[i][j][k] + b_by[i][j][k] - nu * (bxx[i][j][k] + byy[i][j][k]);
 						}
 					}
 				}
@@ -359,8 +359,8 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 				for (int i = 0; i < K-1; i++) {
 					for (int j = 0; j < L-1; j++) {
 						for (int k = 0; k < M + 1; k++) {
-								fvec((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k )) = ai[i][j][k] - a[i][j][k];
-								fvec((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k )) = bi[i][j][k] - b[i][j][k];
+								fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k )) = ai[i][j][k] - a[i][j][k];
+								fvec((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k )) = bi[i][j][k] - b[i][j][k];
 						}
 					}
 				}
@@ -369,9 +369,9 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 				// initial condition: 0th mode
 				for (int i = 0; i < K+1; i++) {
 					for (int j = 0; j < L+1; j++) {
-						fvec((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) 
+						fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) 
 							+ 2.0 * init_a[(sx + Nx * sy ) * (K + 1) * (L + 1) + i + K * j];
-						fvec((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) 
+						fvec((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) 
 							+ 2.0 * init_b[(sx + Nx * sy ) * (K + 1) * (L + 1) + i + K * j];
 					}
 				}
@@ -385,23 +385,23 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 			for (int j = 0; j < L+1; j++) {
 				for (int k = 0; k < M+1; k++) {
 					for (int i = 0; i < K+1; i++) {
-						ac_tmp[i] = x((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-						bc_tmp[i] = x((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						ac_tmp[i] = x((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						bc_tmp[i] = x((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						if (sx == 0) {
-							al_tmp[i] = x((Nx - 1 + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							bl_tmp[i] = x((Nx - 1 + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							ar_tmp[i] = x((sx + 1 + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							br_tmp[i] = x((sx + 1 + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							al_tmp[i] = x((Nx - 1 + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							bl_tmp[i] = x((Nx - 1 + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							ar_tmp[i] = x((sx + 1 + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							br_tmp[i] = x((sx + 1 + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						} else if ( sx == Nx - 1) {
-							al_tmp[i] = x((sx - 1 + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							bl_tmp[i] = x((sx - 1 + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							ar_tmp[i] = x((sx + 1 + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							br_tmp[i] = x((sx + 1 + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							al_tmp[i] = x((sx - 1 + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							bl_tmp[i] = x((sx - 1 + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							ar_tmp[i] = x((sx + 1 + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							br_tmp[i] = x((sx + 1 + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						} else {
-							al_tmp[i] = x((sx - 1 + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							bl_tmp[i] = x((sx - 1 + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							ar_tmp[i] = x((0 + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							br_tmp[i] = x((0 + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							al_tmp[i] = x((sx - 1 + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							bl_tmp[i] = x((sx - 1 + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							ar_tmp[i] = x((0 + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							br_tmp[i] = x((0 + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						}
 					}
 					double [al_sol_right, al_der_right] = echebser1(1.0, al_tmp);
@@ -409,16 +409,16 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 					double [ac_sol_right, ac_der_right] = echebser1(1.0, ac_tmp);
 					double [ar_sol_left, ar_der_left] = echebser1(-1.0, ar_tmp);
 
-					fvec((sx + Nx * sy ) * num_sub + 0 * N + K + (K + 1) * ( j + (L + 1) * 0 )) = ac_sol_left - al_sol_right;
-					fvec((sx + Nx * sy ) * num_sub + 0 * N + (K - 1) + (K + 1) * ( j + (L + 1) * 0 )) = ac_der_right - ar_der_left;
+					fvec((sx + Nx * sy ) * Nm + 0 * N + K + (K + 1) * ( j + (L + 1) * 0 )) = ac_sol_left - al_sol_right;
+					fvec((sx + Nx * sy ) * Nm + 0 * N + (K - 1) + (K + 1) * ( j + (L + 1) * 0 )) = ac_der_right - ar_der_left;
 						
 					double [bl_sol_right, bl_der_right] = echebser1(1.0, bl_tmp);
 					double [bc_sol_left, bc_der_left] = echebser1(-1.0, bc_tmp);
 					double [bc_sol_right, bc_der_right] = echebser1(1.0, bc_tmp);
 					double [br_sol_left, br_der_left] = echebser1(-1.0, br_tmp);
 
-					fvec((sx + Nx * sy ) * num_sub + 1 * N + K + (K + 1) * ( j + (L + 1) * 0 )) = bc_sol_left - bl_sol_right;
-					fvec((sx + Nx * sy ) * num_sub + 1 * N + (K - 1) + (K + 1) * ( j + (L + 1) * 0 )) = bc_der_right - br_der_left;
+					fvec((sx + Nx * sy ) * Nm + 1 * N + K + (K + 1) * ( j + (L + 1) * 0 )) = bc_sol_left - bl_sol_right;
+					fvec((sx + Nx * sy ) * Nm + 1 * N + (K - 1) + (K + 1) * ( j + (L + 1) * 0 )) = bc_der_right - br_der_left;
 				}
 			}
 			
@@ -426,23 +426,23 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 			for (int i = 0; i < K+1; i++) {
 				for (int k = 0; k < M+1; k++) {
 					for (int j = 0; j < L+1; j++) {
-						ac_tmp[j] = x((sx + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-						bc_tmp[j] = x((sx + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						ac_tmp[j] = x((sx + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						bc_tmp[j] = x((sx + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						if (sy == 0) {
-							al_tmp[j] = x((sx + Nx * (Ny - 1)) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							bl_tmp[j] = x((sx + Nx * (Ny - 1)) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							ar_tmp[j] = x((sx + Nx * (sy + 1)) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							br_tmp[j] = x((sx + Nx * (sy + 1)) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							al_tmp[j] = x((sx + Nx * (Ny - 1)) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							bl_tmp[j] = x((sx + Nx * (Ny - 1)) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							ar_tmp[j] = x((sx + Nx * (sy + 1)) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							br_tmp[j] = x((sx + Nx * (sy + 1)) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						} else if ( sy == Ny - 1) {
-							al_tmp[j] = x((sx + Nx * (sy - 1)) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							bl_tmp[j] = x((sx + Nx * (sy - 1)) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							ar_tmp[j] = x((sx + Nx * (sy + 1)) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							br_tmp[j] = x((sx + Nx * (sy + 1)) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							al_tmp[j] = x((sx + Nx * (sy - 1)) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							bl_tmp[j] = x((sx + Nx * (sy - 1)) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							ar_tmp[j] = x((sx + Nx * (sy + 1)) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							br_tmp[j] = x((sx + Nx * (sy + 1)) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						} else {
-							al_tmp[j] = x((sx + Nx * (sy - 1) ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							bl_tmp[j] = x((sx + Nx * (sy - 1) ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							ar_tmp[j] = x((sx + Nx * 0 ) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-							br_tmp[j] = x((sx + Nx * 0 ) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							al_tmp[j] = x((sx + Nx * (sy - 1) ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							bl_tmp[j] = x((sx + Nx * (sy - 1) ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							ar_tmp[j] = x((sx + Nx * 0 ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+							br_tmp[j] = x((sx + Nx * 0 ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						}
 					}
 					double [al_sol_right, al_der_right] = echebser1(1.0, al_tmp);
@@ -450,16 +450,16 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 					double [ac_sol_right, ac_der_right] = echebser1(1.0, ac_tmp);
 					double [ar_sol_left, ar_der_left] = echebser1(-1.0, ar_tmp);
 
-					fvec((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( L + (L + 1) * 0 )) = ac_sol_left - al_sol_right;
-					fvec((sx + Nx * sy ) * num_sub + 0 * N + i + (K + 1) * ( (L - 1) + (L + 1) * 0 )) = ac_der_right - ar_der_left;
+					fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( L + (L + 1) * 0 )) = ac_sol_left - al_sol_right;
+					fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( (L - 1) + (L + 1) * 0 )) = ac_der_right - ar_der_left;
 						
 					double [bl_sol_right, bl_der_right] = echebser1(1.0, bl_tmp);
 					double [bc_sol_left, bc_der_left] = echebser1(-1.0, bc_tmp);
 					double [bc_sol_right, bc_der_right] = echebser1(1.0, bc_tmp);
 					double [br_sol_left, br_der_left] = echebser1(-1.0, br_tmp);
 
-					fvec((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( L + (L + 1) * 0 )) = bc_sol_left - bl_sol_right;
-					fvec((sx + Nx * sy ) * num_sub + 1 * N + i + (K + 1) * ( (L - 1) + (L + 1) * 0 )) = bc_der_right - br_der_left;
+					fvec((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( L + (L + 1) * 0 )) = bc_sol_left - bl_sol_right;
+					fvec((sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( (L - 1) + (L + 1) * 0 )) = bc_der_right - br_der_left;
 				}
 				}
 			}
@@ -476,12 +476,12 @@ int main()
 	for (int i = 0; i < Nx; i++) { BMAx[i] = 0.5 * (x_grid[i+1] - x_grid[i]); }
 	for (int i = 0; i < Ny; i++) { BMAy[i] = 0.5 * (y_grid[i+1] - y_grid[i]); }
 
-	int num_eq = 2;
-	int num_sub = num_eq * (K + 1) * (L + 1) * (M + 1);
-	int nelem = Nx * Ny * num_eq * (K + 1) * (L + 1) * (M + 1);
+	int Ne = 2;
+	int Nm = Ne * (K + 1) * (L + 1) * (M + 1);
+	int Nt = Nx * Ny * Ne * (K + 1) * (L + 1) * (M + 1);
 	
-    	Eigen::VectorXd x0 = Eigen::VectorXd::Zero(nelem);
-    	Eigen::VectorXd x1(nelem);
+    Eigen::VectorXd x0 = Eigen::VectorXd::Zero(Nt);
+    Eigen::VectorXd x1(Nt);
 	vector<double> a((K + 1) * (L + 1) * (M + 1));
 	vector<double> b((K + 1) * (L + 1) * (M + 1));
 	
@@ -496,36 +496,36 @@ int main()
 		for (int sy = 0; sy < Ny; sy++) {
 			for (int i = 0; i < K+1; i++) {
 				for (int j = 0; j < L+1; j++) {
-					x0((sx + Nx * sy) * num_sub + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_as[(sx + Nx * sy) * num_sub + i + K * j];
-					x0((sx + Nx * sy) * num_sub + 1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_bs[(sx + Nx * sy) * num_sub + i + K * j];
+					x0((sx + Nx * sy) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_as[(sx + Nx * sy) * Nm + i + K * j];
+					x0((sx + Nx * sy) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = 2.0 * init_bs[(sx + Nx * sy) * Nm + i + K * j];
 				}
 			}
 		}
-    	}
+    }
 	
-    	clock_t c_start = clock();
+    clock_t c_start = clock();
 	//x1 = newton(x0, gwrm);
 	/*
-	Eigen::VectorXd dh(nelem);
-	Eigen::VectorXd f0(nelem);
-	Eigen::VectorXd f1(nelem);
-	Eigen::MatrixXd H = Eigen::MatrixXd::Zero(nelem,nelem);
+	Eigen::VectorXd dh(Nt);
+	Eigen::VectorXd f0(Nt);
+	Eigen::VectorXd f1(Nt);
+	Eigen::MatrixXd H = Eigen::MatrixXd::Zero(Nt,Nt);
 	f0 = gwrm_linear(x0);
 	double h = 0.001;
-	for (int j = 0; j < nelem; j++) {
-		dh = Eigen::VectorXd::Zero(nelem);
+	for (int j = 0; j < Nt; j++) {
+		dh = Eigen::VectorXd::Zero(Nt);
 		dh(j) = h;
 		x1 = x0 + dh;
 		f1 = gwrm(x1);
-		for (int i = 0; i < nelem; i++) {
+		for (int i = 0; i < Nt; i++) {
 			H(i,j) = (f1(i) - f0(i)) / h;
 		}
 	}
 	H = H.inverse();
 	
 	
-	Eigen::MatrixXd H = Eigen::MatrixXd::Zero(nelem,nelem);
-	for (int j = 0; j < nelem; j++) {
+	Eigen::MatrixXd H = Eigen::MatrixXd::Zero(Nt,Nt);
+	for (int j = 0; j < Nt; j++) {
 		H(j,j) = 1.0;
 	}
 	*/
@@ -535,9 +535,9 @@ int main()
 	//x1 = AMFA(x0, gwrm);
 	x1 = anderson_acceleration(x0, gwrm);
 	//x1 = anderson_picard_acceleration(x0, gwrm);
-    	clock_t c_end = clock();
-    	long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
-    	cout << "CPU time used: " << time_elapsed_ms << " ms\n";
+    clock_t c_end = clock();
+    long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
+    cout << "CPU time used: " << time_elapsed_ms << " ms\n";
 	
 	vector<double> sigma(K+1,1);
 	vector<double> cutoff(K+1,1);

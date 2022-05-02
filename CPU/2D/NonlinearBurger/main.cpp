@@ -14,7 +14,7 @@ int K = 22, L = 22, M = 5;
 int N = (K + 1) * (L + 1) * (M + 1);
 double Lx = 0, Rx = 2.0 * PI;
 double Ly = 0, Ry = 2.0 * PI;
-double Lt = 0, Rt = 0.01;
+double Lt = 0, Rt = 1.0;
 
 double BMAx = 0.5 * (Rx - Lx), BPAx = 0.5 * (Rx + Lx);
 double BMAy = 0.5 * (Ry - Ly), BPAy = 0.5 * (Ry + Ly);
@@ -330,7 +330,7 @@ int main()
 	vector<double> a((K + 1) * (L + 1) * (M + 1));
 	vector<double> b((K + 1) * (L + 1) * (M + 1));
 	
-	chebyshev_coefficients_2D(K+1, L+1, u0, +, BMAx, BPAx, BMAy, BPAy);
+	chebyshev_coefficients_2D(K+1, L+1, u0, init_a, BMAx, BPAx, BMAy, BPAy);
 	chebyshev_coefficients_2D(K+1, L+1, v0, init_b, BMAx, BPAx, BMAy, BPAy);
 	
 	for (int i = 0; i < K+1; i++) {
@@ -345,7 +345,7 @@ int main()
 	cout << "*** STEP 2: SOLVER STARTED *** \n";
 	//x1 = newton(x0, gwrm);
 
-	/*
+	
 	Eigen::VectorXd dh(nelem);
 	Eigen::VectorXd f0(nelem);
 	Eigen::VectorXd f1(nelem);
@@ -361,20 +361,21 @@ int main()
 			H(i,j) = (f1(i) - f0(i)) / h;
 		}
 	}
-	
+	/*
 	Eigen::MatrixXd H = Eigen::MatrixXd::Zero(nelem,nelem);
 	for (int j = 0; j < nelem; j++) {
 		H(j,j) = -1.0;
 	}
-	cout << "*** STEP 2: CALC INV ***";
-	//H = H.inverse();
-	
-	//x1 = quasi_newton(x0, gwrm, H);
 	*/
+	cout << "*** STEP 2: CALC INV ***";
+	H = H.inverse();
+	
+	x1 = quasi_newton(x0, gwrm, H);
+	
 	
 	
 	//x1 = AMFA(x0, gwrm);
-	x1 = anderson_acceleration(x0, gwrm);
+	//x1 = anderson_acceleration(x0, gwrm);
 	//x1 = anderson_picard_acceleration(x0, gwrm);
     clock_t c_end = clock();
     long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;

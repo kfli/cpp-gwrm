@@ -25,9 +25,10 @@ for i in range(len(data)):
 #pp.title('U')
 #pp.legend()
 #pp.show()
-
 fig = pp.figure()
+# Subplot 1D
 ax = fig.add_subplot(111, projection='3d')
 surf = ax.plot_trisurf(X, Y, Z, cmap=cm.jet, linewidth=0.1)
 fig.colorbar(surf, shrink=0.5, aspect=5)
+
 pp.show()
