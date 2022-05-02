@@ -1,8 +1,12 @@
 # GWRM - Generalized Weighted Residual Method
 
 ## Examples
-* 2D Burgers, t_end = 1.0, (Nx = Ny = 1, K = L = 22, M = 5) \
+
+### 2D Burgers
+t = 1.0, (Nx = Ny = 1, K = L = 22, M = 5) \
 ![alt text](CPU/2D/NonlinearBurger/Figure_1.png "2D Burger solution") 
+
+### 2D Ideal MHD
 
 ## Install development tools 
 Ubuntu
@@ -20,7 +24,9 @@ Windows
 1. Install MinGW
 2. Install compilers (c++, python, fortran)
 3. To use make in PowerShell (mingw32-make.exe or make.exe)
-   $ new-item alias:make -value 'C:\Program Files (x86)\GnuWin32\bin\<mingw32-make.exe or make.exe>.exe'
+   ```bash
+   new-item alias:make -value 'C:\Program Files (x86)\GnuWin32\bin\make.exe.exe'
+   ```
 
 ## Install Eigen
 1. Download and extract Eigen (Win - 'C:\'; Linux - /usr/local/include)

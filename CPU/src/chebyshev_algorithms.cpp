@@ -25,12 +25,12 @@ tuple<double, double> echebser1(double x, vector<double>& a) {
 
 	double x2 = 2.0 * x;
 
-	for (int i = nelem - 1; i > 0; i--) {
+	for (int i = nelem - 1; i >= 0; i--) {
 		b2 = b1;
 		b1 = b0;
 		b0 = a[i] - b2 + x2 * b1;
 
-		if ( i > 1 ) {
+		if ( i >= 1 ) {
 		c2 = c1;
 		c1 = c0;
 		c0 = b0 - c2 + x2 * c1;
@@ -40,7 +40,7 @@ tuple<double, double> echebser1(double x, vector<double>& a) {
 	double y0 = 0.5 * ( b0 - b2 );
 	double y1 = 2.0 * ( c0 - c2 );
 
-	return std::make_tuple(y0, y1);
+	return make_tuple(y0, y1);
 }
 
 void chebyshev_coefficients_2D(int M, int N, double (*func)(double, double), vector<double>& c, double BMA1, double BPA1, double BMA2, double BPA2) {

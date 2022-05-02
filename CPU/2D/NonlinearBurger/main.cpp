@@ -325,8 +325,8 @@ int main()
 	cout << "*** STEP 1: GWRM STARTED *** \n";
 	int num_eq = 2;
 	int nelem = num_eq * (K + 1) * (L + 1) * (M + 1);
-    	Eigen::VectorXd x0 = Eigen::VectorXd::Zero(nelem);
-    	Eigen::VectorXd x1(nelem);
+    Eigen::VectorXd x0 = Eigen::VectorXd::Zero(nelem);
+    Eigen::VectorXd x1(nelem);
 	vector<double> a((K + 1) * (L + 1) * (M + 1));
 	vector<double> b((K + 1) * (L + 1) * (M + 1));
 	

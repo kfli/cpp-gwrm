@@ -501,7 +501,7 @@ int main()
 	
     clock_t c_start = clock();
 	//x1 = newton(x0, gwrm);
-	
+	/*
 	Eigen::VectorXd dh(Nt);
 	Eigen::VectorXd f0(Nt);
 	Eigen::VectorXd f1(Nt);
@@ -525,7 +525,7 @@ int main()
 		H(j,j) = 1.0;
 	}
 	*/
-	x1 = quasi_newton(x0, gwrm, H);
+	//x1 = quasi_newton(x0, gwrm, H);
 	
 	
 	//x1 = AMFA(x0, gwrm);
