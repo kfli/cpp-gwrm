@@ -365,7 +365,6 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 				}
 				
 				// initial condition: 0th mode
-				// initial condition: 0th mode
 				for (int i = 0; i < K+1; i++) {
 					for (int j = 0; j < L+1; j++) {
 						fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) = fvec((sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * 0 )) 

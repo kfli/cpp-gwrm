@@ -1,2 +1,10 @@
+# Ignore binary files
 main
+main_multidomain
+
+# Ignore IDE files
+.vscode/
 .project
+
+# Ignore txt files
+*.txt

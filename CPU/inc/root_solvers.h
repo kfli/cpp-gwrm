@@ -10,8 +10,4 @@ Eigen::VectorXd quasi_newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::Ve
 
 Eigen::VectorXd newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd));
 
-Eigen::VectorXd AMFA(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd));
-
 Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd));
-
-Eigen::VectorXd anderson_picard_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(Eigen::VectorXd));
