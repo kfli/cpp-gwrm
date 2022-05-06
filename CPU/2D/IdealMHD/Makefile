@@ -1,5 +1,5 @@
 # The build target 
-TARGET = main
+TARGET = testBoundaryConditions
 INC_DIR = ../../inc
 SRC_DIR = ../../src
 DEPS = $(INC_DIR)/root_solvers.h

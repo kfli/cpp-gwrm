@@ -10,14 +10,14 @@ using namespace std;
 const double PI = 3.141592653589793238463;
 
 // Define global variables
-int K = 16, L = 16, M = 8;
+int K = 5, L = 5, M = 5;
 int N = (K + 1) * (L + 1) * (M + 1);
 int Ne = 2;
 int Nm = N * Ne;
-int Nx = 3, Ny = 3;
+int Nx = 1, Ny = 1;
 double Lx = 0, Rx = 2.0 * PI;
 double Ly = 0, Ry = 2.0 * PI;
-double Lt = 0, Rt = 0.000001;
+double Lt = 0, Rt = 0.0001;
 
 vector<double> x_grid(Nx+1);
 vector<double> y_grid(Ny+1);
