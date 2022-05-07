@@ -10,12 +10,12 @@ using namespace std;
 const double PI = 3.141592653589793238463;
 
 // Define global variables
-int K = 22, L = 22, M = 5;
+int K = 12, L = 12, M = 5;
 int N = (K + 1) * (L + 1) * (M + 1);
 int Ne = 7;
 double Lx = 0, Rx = 2.0 * PI;
 double Ly = 0, Ry = 2.0 * PI;
-double Lt = 0, Rt = 0.01;
+double Lt = 0, Rt = 0.1;
 
 double BMAx = 0.5 * (Rx - Lx), BPAx = 0.5 * (Rx + Lx);
 double BMAy = 0.5 * (Ry - Ly), BPAy = 0.5 * (Ry + Ly);
@@ -88,24 +88,45 @@ void boundary_conditions(Eigen::VectorXd& fvec, const Eigen::VectorXd& x) {
 	vector<double> Ltmp((L + 1));
 	// boundary conditions: K and K-1 mode
 	for (int ne = 0; ne < Ne; ne++) {
-		for (int j = 0; j < L+1; j++) {
-			for (int k = 0; k < M+1; k++) {
-				for (int i = 0; i < K+1; i++) { Ktmp[i] = x(ne * N + i + (K + 1) * ( j + (L + 1) * k )); }
-				tie(sum_right, sum_der_right) = echebser1(1.0, Ktmp);
-				tie(sum_left, sum_der_left) = echebser1(-1.0, Ktmp);
-				fvec(ne * N + (K - 1) + (K + 1) * ( j + (L + 1) * k )) = sum_right - sum_left;
-				fvec(ne * N + K + (K + 1) * ( j + (L + 1) * k )) = sum_der_right - sum_der_left;
-			}
-    	}
+		if ( ne != 6 ) {
+			for (int j = 0; j < L+1; j++) {
+				for (int k = 0; k < M+1; k++) {
+					for (int i = 0; i < K+1; i++) { Ktmp[i] = x(ne * N + i + (K + 1) * ( j + (L + 1) * k )); }
+					tie(sum_right, sum_der_right) = echebser1(1.0, Ktmp);
+					tie(sum_left, sum_der_left) = echebser1(-1.0, Ktmp);
+					fvec(ne * N + (K - 1) + (K + 1) * ( j + (L + 1) * k )) = sum_right - sum_left;
+					fvec(ne * N + K + (K + 1) * ( j + (L + 1) * k )) = sum_der_right - sum_der_left;
+				}
+	    	}
 
-		// boundary conditions: L and L-1 mode
-		for (int i = 0; i < K+1; i++) {
-			for (int k = 0; k < M+1; k++) {
-				for (int j = 0; j < L+1; j++) { Ltmp[j] = x(ne * N + i + (K + 1) * ( j + (L + 1) * k )); }
-				tie(sum_right, sum_der_right) = echebser1(1.0, Ltmp);
-				tie(sum_left, sum_der_left) = echebser1(-1.0, Ltmp);
-				fvec(ne * N + i + (K + 1) * ( (L - 1) + (L + 1) * k )) = sum_right - sum_left;
-				fvec(ne * N + i + (K + 1) * ( L + (L + 1) * k )) = sum_der_right - sum_der_left;
+			// boundary conditions: L and L-1 mode
+			for (int i = 0; i < K+1; i++) {
+				for (int k = 0; k < M+1; k++) {
+					for (int j = 0; j < L+1; j++) { Ltmp[j] = x(ne * N + i + (K + 1) * ( j + (L + 1) * k )); }
+					tie(sum_right, sum_der_right) = echebser1(1.0, Ltmp);
+					tie(sum_left, sum_der_left) = echebser1(-1.0, Ltmp);
+					fvec(ne * N + i + (K + 1) * ( (L - 1) + (L + 1) * k )) = sum_right - sum_left;
+					fvec(ne * N + i + (K + 1) * ( L + (L + 1) * k )) = sum_der_right - sum_der_left;
+				}
+			}
+		} else {
+			for (int j = 0; j < L+1; j++) {
+				for (int k = 0; k < M+1; k++) {
+					for (int i = 0; i < K+1; i++) { Ktmp[i] = x(ne * N + i + (K + 1) * ( j + (L + 1) * k )); }
+					tie(sum_right, sum_der_right) = echebser1(1.0, Ktmp);
+					tie(sum_left, sum_der_left) = echebser1(-1.0, Ktmp);
+					fvec(ne * N + K + (K + 1) * ( j + (L + 1) * k )) = sum_right - sum_left;
+				}
+	    }
+
+			// boundary conditions: L and L-1 mode
+			for (int i = 0; i < K+1; i++) {
+				for (int k = 0; k < M+1; k++) {
+					for (int j = 0; j < L+1; j++) { Ltmp[j] = x(ne * N + i + (K + 1) * ( j + (L + 1) * k )); }
+					tie(sum_right, sum_der_right) = echebser1(1.0, Ltmp);
+					tie(sum_left, sum_der_left) = echebser1(-1.0, Ltmp);
+					fvec(ne * N + i + (K + 1) * ( L + (L + 1) * k )) = sum_right - sum_left;
+				}
 			}
 		}
 	}
@@ -358,7 +379,7 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 	// dv/dt + u.dv/dx + v.dv/dy - nu.( dv2/dx2 +  dv2/dy2 ) = 0
 	double nu = 0.03;
 	double gamma = 5.0/3.0;
-	double c_h = 1.0;
+	double c_h = 0.0001;
 	double c_p = sqrt(c_h * 0.18);
 
 	chebyshev_z_derivative_3D_array(K, L, M, q, qt, BMAt);
@@ -375,8 +396,8 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 					fvec(0 * N + i + (K + 1) * ( j + (L + 1) * k )) = qt[i][j][k] + u_qx[i][j][k] + v_qy[i][j][k] - q_ux[i][j][k] - q_vy[i][j][k];
 					fvec(1 * N + i + (K + 1) * ( j + (L + 1) * k )) = ut[i][j][k] + u_ux[i][j][k] + v_uy[i][j][k] + q_px[i][j][k] + q_H_Hx[i][j][k] - q_H_By[i][j][k] - nu * (uxx[i][j][k] + uyy[i][j][k]);
 					fvec(2 * N + i + (K + 1) * ( j + (L + 1) * k )) = vt[i][j][k] + u_vx[i][j][k] + v_vy[i][j][k] + q_py[i][j][k] - q_B_Hx[i][j][k] + q_B_By[i][j][k] - nu * (vxx[i][j][k] + vyy[i][j][k]);
-					fvec(3 * N + i + (K + 1) * ( j + (L + 1) * k )) = Bt[i][j][k] + B_vy[i][j][k] - H_uy[i][j][k] + u_Bx[i][j][k] + v_By[i][j][k] + psix[i][j][k] - nu * (Bxx[i][j][k] + Byy[i][j][k]);
-					fvec(4 * N + i + (K + 1) * ( j + (L + 1) * k )) = Ht[i][j][k] + H_ux[i][j][k] - B_vx[i][j][k] + u_Hx[i][j][k] + v_Hy[i][j][k] + psiy[i][j][k] - nu * (Hxx[i][j][k] + Hyy[i][j][k]);
+					fvec(3 * N + i + (K + 1) * ( j + (L + 1) * k )) = Bt[i][j][k] + B_vy[i][j][k] - H_uy[i][j][k] + u_Bx[i][j][k] + v_By[i][j][k] + psix[i][j][k] - 0 * (Bxx[i][j][k] + Byy[i][j][k]);
+					fvec(4 * N + i + (K + 1) * ( j + (L + 1) * k )) = Ht[i][j][k] + H_ux[i][j][k] - B_vx[i][j][k] + u_Hx[i][j][k] + v_Hy[i][j][k] + psiy[i][j][k] - 0 * (Hxx[i][j][k] + Hyy[i][j][k]);
 					fvec(5 * N + i + (K + 1) * ( j + (L + 1) * k )) = pt[i][j][k] + u_px[i][j][k] + v_py[i][j][k] + gamma * (p_ux[i][j][k] + p_vy[i][j][k]);
 					fvec(6 * N + i + (K + 1) * ( j + (L + 1) * k )) = psit[i][j][k] + (pow(c_h,2) / pow(c_p,2)) * psi[i][j][k] + pow(c_h,2) * (Bx[i][j][k] + Hy[i][j][k]);
 			}
@@ -453,31 +474,34 @@ int main()
 
 	cout << "*** STEP 2: SOLVER STARTED *** \n";
 	//x1 = newton(x0, gwrm);
-
+	/*
 	cout << "*** STEP 2.1: COMPUTE INITIAL JACOBIAN *** \n";
-	Eigen::VectorXd dh(Nt);
-	Eigen::VectorXd f0(Nt);
-	Eigen::VectorXd f1(Nt);
-	Eigen::MatrixXd H = Eigen::MatrixXd::Zero(Nt,Nt);
+	Eigen::VectorXd dh(nelem);
+	Eigen::VectorXd f0(nelem);
+	Eigen::VectorXd f1(nelem);
+	Eigen::MatrixXd H = Eigen::MatrixXd::Zero(nelem,nelem);
 	f0 = gwrm_linear(x0);
 	double h = pow(10,-6);
-	for (int j = 0; j < Nt; j++) {
-		dh = Eigen::VectorXd::Zero(Nt);
+	for (int j = 0; j < nelem; j++) {
+		dh = Eigen::VectorXd::Zero(nelem);
 		dh(j) = h;
 		x1 = x0 + dh;
 		f1 = gwrm(x1);
-		for (int i = 0; i < Nt; i++) {
+		for (int i = 0; i < nelem; i++) {
 			H(i, j) = (f1(i) - f0(i)) / h;
 		}
 	}
 	cout << "*** STEP 2.2: COMPUTE INVERSE *** \n";
-	Eigen::MatrixXd I(Nt,Nt);
+	Eigen::MatrixXd I(nelem,nelem);
 	I.setIdentity();
-	Eigen::MatrixXd  H_inv =  H.colPivHouseholderQr().solve(I);
+	H =  H.colPivHouseholderQr().solve(I);
 
 	cout << "*** STEP 2.3: BEGIN: QUASI NEWTON *** \n";
-	x1 = quasi_newton(x0, gwrm, H_inv);
-
+	x1 = quasi_newton(x0, gwrm, H);
+	*/
+	cout << "*** STEP 3.0: BEGIN: QUASI NEWTON *** \n";
+	Eigen::MatrixXd I(nelem,nelem);
+	x1 = quasi_newton(x0, gwrm, I.setIdentity());
 	//cout << "*** STEP 3.0: BEGIN: ANDERSON ACCELERATION *** \n";
 	//x1 = anderson_acceleration(x0, gwrm);
 
@@ -500,7 +524,7 @@ int main()
 	for (int i = 0; i < K+1; i++) {
 		for (int j = 0; j < L+1; j++) {
 			for (int k = 0; k < M+1; k++) {
-				a[i + (K + 1) * ( j + (L + 1) * k )] = x1(0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+				a[i + (K + 1) * ( j + (L + 1) * k )] = x1(3 * N + i + (K + 1) * ( j + (L + 1) * k ));
 				b[i + (K + 1) * ( j + (L + 1) * k )] = cutoff[i] * cutoff[j] * x1(1 * N + i + (K + 1) * ( j + (L + 1) * k ));
 			}
 		}

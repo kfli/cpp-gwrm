@@ -7,56 +7,56 @@ using namespace std;
 typedef vector< vector<double> > Matrix;
 
 Eigen::VectorXd quasi_newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd), Eigen::MatrixXd& H) {
-    int nelem = x0.size();
-    Eigen::VectorXd s(nelem);
-    Eigen::VectorXd y(nelem);
-    Eigen::VectorXd x1(nelem);
-    x1 = x0;
+  int nelem = x0.size();
+  Eigen::VectorXd s(nelem);
+  Eigen::VectorXd y(nelem);
+  Eigen::VectorXd x1(nelem);
+  x1 = x0;
 
-    Eigen::VectorXd f0(nelem);
-    Eigen::VectorXd f1(nelem);
+  Eigen::VectorXd f0(nelem);
+  Eigen::VectorXd f1(nelem);
 
 	f0 = f(x0);
-    double err = 1.0;
-    int k = 0;
-    do {
-        x1 = x0 - 0.9*H*f0;
-        f1 = f(x1);
-		
-        s = x1 - x0;
-        y = f1 - f0;
+  double err = 1.0;
+  int k = 0;
+  do {
+    x1 = x0 - H*f0;
+    f1 = f(x1);
 
-        err = f1.squaredNorm();
-        cout << "k = " << k << "; err = " << err << endl;
-		if (err < pow(10, -8)) {
-			break;
-		}
-        
-        // "Bad" Broyden
-        H = H + (s - H * y) * y.transpose() / (y.transpose() * y);
+    s = x1 - x0;
+    y = f1 - f0;
 
-        x0 = x1;
-        f0 = f1;
+    err = f1.squaredNorm();
+    cout << "k = " << k << "; err = " << err << endl;
+  	if (err < pow(10, -8)) {
+  		break;
+  	}
 
-        ++k;
-    } while (err > pow(10, -8) && k < 1000);
+    // "Bad" Broyden
+    H = H + (s - H * y) * y.transpose() / (y.transpose() * y);
+
+    x0 = x1;
+    f0 = f1;
+
+    ++k;
+  } while (err > pow(10, -8) && k < 1000);
     return x1;
 }
 
 Eigen::VectorXd newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd)) {
-    int nelem = x0.size();
-	Eigen::VectorXd dh;
-    Eigen::VectorXd x1(nelem);
-    x1 = x0;
+  int nelem = x0.size();
+  Eigen::VectorXd dh;
+  Eigen::VectorXd x1(nelem);
+  x1 = x0;
 
-    Eigen::VectorXd f0(nelem);
-    Eigen::VectorXd f1(nelem);
+  Eigen::VectorXd f0(nelem);
+  Eigen::VectorXd f1(nelem);
 
-	Eigen::MatrixXd J(nelem,nelem);
-	Eigen::MatrixXd J1(nelem,nelem);
-	
+  Eigen::MatrixXd J(nelem,nelem);
+  Eigen::MatrixXd J1(nelem,nelem);
+
 	f0 = f(x0);
-	double h = 0.001;
+	double h = pow(10,-6);
 	for (int j = 0; j < nelem; j++) {
 		dh = Eigen::VectorXd::Zero(nelem);
 		dh(j) = dh(j) + h;
@@ -75,15 +75,15 @@ Eigen::VectorXd newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd
 
         err = f1.squaredNorm();
         cout << "k = " << k << "; err = " << err << endl;
-		if (err < pow(10, -8)) {
+		if (err < pow(10,-8)) {
 			break;
 		}
 
         x0 = x1;
         f0 = f1;
-		
+
 		f0 = f(x0);
-		double h = 0.001;
+		double h = pow(10,-6);
 		for (int j = 0; j < nelem; j++) {
 			dh = Eigen::VectorXd::Zero(nelem);
 			dh(j) = dh(j) + h;
@@ -94,45 +94,45 @@ Eigen::VectorXd newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd
 			}
 		}
         ++k;
-    } while (err > pow(10, -8) && k < 1000);
+    } while (err > pow(10,-8) && k < 1000);
     return x1;
 }
 
 Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(Eigen::VectorXd)) {
-    int nelem = x.size();
+  int nelem = x.size();
 	int mk = 0;
 	int mmax = 1000;
 	double beta = 0.01;
 	Eigen::VectorXd gamma;
-    Eigen::MatrixXd D(nelem,0); 
-	Eigen::MatrixXd E(nelem,0); 
-	
+  Eigen::MatrixXd D(nelem,0);
+	Eigen::MatrixXd E(nelem,0);
+
 	Eigen::VectorXd x0(nelem);
-    Eigen::VectorXd x1(nelem);
-    Eigen::VectorXd f0(nelem);
-    Eigen::VectorXd f1(nelem);
+  Eigen::VectorXd x1(nelem);
+  Eigen::VectorXd f0(nelem);
+  Eigen::VectorXd f1(nelem);
 	Eigen::VectorXd g0(nelem);
-    Eigen::VectorXd g1(nelem);
-	
+  Eigen::VectorXd g1(nelem);
+
 	x0 = x;
 
-    double err = 1.0;
-    int k = 0;
+  double err = 1.0;
+  int k = 0;
 	int p = 0;
-    do {
-        f0 = f(x0);
+  do {
+    f0 = f(x0);
 		g0 = f0 + x0;
-		
-        err = f0.squaredNorm();
+
+    err = f0.squaredNorm();
 		cout << "k = " << k << "; err = " << err << endl;
 		if (err < pow(10,-8)) {
 			break;
 		}
-		
+
 		if (k == 0) {
 			x0 = beta * f0 + x0;
 		} else {
-			if (mk < mmax) { 
+			if (mk < mmax) {
 				D.conservativeResize(D.rows(), D.cols()+1);
 				D.col(D.cols()-1) = f0 - f1;
 				E.conservativeResize(E.rows(), E.cols()+1);
@@ -148,7 +148,7 @@ Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(E
 			}
 			mk = mk + 1;
 			Eigen::JacobiSVD<Eigen::MatrixXd> svd(D);
-			double cond = svd.singularValues()(0) 
+			double cond = svd.singularValues()(0)
 				/ svd.singularValues()(svd.singularValues().size()-1);
 			cout << "condition number " << cond << "; mk = " << mk << endl;
 			while  (cond > pow(10,8) && mk > 2) {
@@ -156,15 +156,15 @@ Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(E
 				E = E.block(0,1,E.rows(),E.cols()-1).eval();
 				mk = mk - 1;
 				Eigen::JacobiSVD<Eigen::MatrixXd> svd(D);
-				cond = svd.singularValues()(0) 
+				cond = svd.singularValues()(0)
 					/ svd.singularValues()(svd.singularValues().size()-1);
 				cout << "condition number " << cond << "; mk = " << mk << endl;
-			} 
+			}
 			gamma = D.colPivHouseholderQr().solve(f0);
 			/* QR decomposition */
-			//x0 = g0 - E * gamma;
+			x0 = g0 - E * gamma;
 			/* SVD */
-			x0 = g0 - E*D.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(f0);
+			//x0 = g0 - E*D.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(f0);
 			if (beta > 0 && beta < 1) {
 				x0 = x0 - (1 - beta) * (f0 - D * gamma);
 			}

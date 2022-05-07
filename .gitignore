@@ -1,6 +1,7 @@
 # Ignore binary files
 main
 main_multidomain
+*.exe
 
 # Ignore IDE files
 .vscode/
