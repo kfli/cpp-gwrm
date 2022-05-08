@@ -1,0 +1,58 @@
+\documentclass[a4paper, 11pt]{article} % Font size (can be 10pt, 11pt or 12pt) and paper size (remove a4paper for US letter paper)
+\usepackage[margin=0.7in]{geometry}
+\usepackage[protrusion=true,expansion=true]{microtype} % Better typography
+\usepackage[numbers]{natbib}
+\usepackage{graphicx} % Required for including pictures
+\usepackage[x11names]{xcolor}
+\usepackage{wrapfig} % Allows in-line images
+\usepackage{enumerate}
+\usepackage{bm}
+\usepackage{amsmath,mathrsfs}
+\usepackage{amssymb}
+\usepackage{multicol}
+\usepackage{tikz}
+\usetikzlibrary{tikzmark,calc,decorations.pathreplacing}
+
+\usepackage{mathpazo} % Use the Palatino font
+\usepackage[T1]{fontenc} % Required for accented characters
+\linespread{1.05} % Change line spacing here, Palatino benefits from a slight increase by default
+
+\usepackage{etoolbox}
+\apptocmd{\thebibliography}{\raggedright}{}{}
+
+\makeatletter
+\renewcommand\@biblabel[1]{\textbf{#1.}} % Change the square brackets for each bibliography item from '[1]' to '1.'
+\renewcommand{\@listI}{\itemsep=0pt} % Reduce the space between items in the itemize and enumerate environments and the bibliography
+\renewcommand{\labelitemi}{\textcolor{IndianRed3}{\bfseries\textbullet}}
+
+\renewcommand{\maketitle}{ % Customize the title - do not edit title and author name here, see the TITLE block below
+\begin{flushright} % Right align
+{\LARGE\@title} % Increase the font size of the title
+
+\vspace{50pt} % Some vertical space between the title and author name
+
+{\large\@author} % Author name
+\\\@date % Date
+
+\vspace{40pt} % Some vertical space between the author block and abstract
+\end{flushright}
+}
+
+\begin{document}
+\subsection*{2D Poisson equation}
+\begin{center}
+\begin{align}
+\frac{\partial^2 u}{\partial^2 x} + \frac{\partial^2 u}{\partial^2 y} = f(x,y)
+\end{align}
+\end{center}
+
+\subsection*{Example 1}
+\begin{align}
+&f(x,y) = \text{sin}(\pi x)\text{sin}(\pi y) \\
+~~&\text{[Dirichlet boundary conditions]} \nonumber \\
+&u(0,y) = u(1,y) = 0, \\
+&u(x,0) = u(x,1) = 0. 
+\end{align}
+
+
+\end{document}

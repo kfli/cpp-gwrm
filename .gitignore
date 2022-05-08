@@ -9,3 +9,9 @@ main_multidomain
 
 # Ignore txt files
 *.txt
+
+# Ignore generated LaTeX files
+*.aux
+*.gz
+*.log
+*.pdf
