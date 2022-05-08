@@ -37,18 +37,22 @@ void chebyshev_coefficients_2D_array(int M, double (*f)(double),  vector<double>
 void chebyshev_coefficients_2D(int M, int N, double (*func)(double, double), vector<double>& c, double BMA1, double BPA1, double BMA2, double BPA2);
 
 void chebyshev_coefficients_2D(int M, int N, int sx, int sy, int Nx, int Ny, double (*func)(double, double), vector<double>& c, double BMA1, double BPA1, double BMA2, double BPA2);
-	
+
 void chebyshev_x_derivative_1D_array(int l, vector<double> &a, vector<double> &b, double BMAx);
 
 void chebyshev_x_derivative_2D_array(int l, int m, Matrix &a, Matrix &b, double BMAx);
 
-void chebyshev_y_derivative_2D_array(int l, int m, Matrix &a, Matrix &b, double BMAy); 
+void chebyshev_y_derivative_2D_array(int l, int m, Matrix &a, Matrix &b, double BMAy);
 
 void chebyshev_x_derivative_3D_array(int l, int m, int n, Array3D &a, Array3D &b, double BMAx);
 
 void chebyshev_y_derivative_3D_array(int l, int m, int n, Array3D &a, Array3D &b, double BMAy);
 
 void chebyshev_z_derivative_3D_array(int l, int m, int n, Array3D &a, Array3D &b, double BMAz);
+
+void chebyshev_x_integration_2D_array(int l, int m, Matrix &a, Matrix &b, double BMA);
+
+void chebyshev_y_integration_2D_array(int l, int m, Matrix &a, Matrix &b, double BMA);
 
 void chebyshev_z_integration_3D_array(int l, int m, int n, Array3D &a, Array3D &b, double BMAz);
 

@@ -10,7 +10,7 @@ using namespace std;
 const double PI = 3.141592653589793238463;
 
 // Define global variables
-int K = 16, L = 16;
+int K = 22, L = 22;
 int N = (K + 1) * (L + 1);
 int Ne = 1;
 double Lx = -1.0, Rx = 1.0;
@@ -25,6 +25,12 @@ double alpha0(double x, double y) {
 double vol0(double x, double y) {
 	return 0.0785386;
 }
+
+Matrix alpha(K+1, vector<double>(L+1,0));
+Matrix alpha_ix(K+1, vector<double>(L+1,0));
+Matrix alpha_ixy(K+1, vector<double>(L+1,0));
+vector<double> vol((K + 1) * (L + 1));
+
 
 vector<double> chebyshev_polynomials(double x, int n) {
 	vector<double> T(n);
@@ -74,7 +80,7 @@ void boundary_conditions(Eigen::VectorXd& fvec, const Eigen::VectorXd& x) {
 			tie(sum_right, sum_der_right) = echebser1(1.0, Ltmp);
 			tie(sum_left, sum_der_left) = echebser1(-1.0, Ltmp);
 			fvec(ne * N + i + (K + 1) * L) = sum_right - sum_left;
-			fvec(ne * N + i + (K + 1) * (L - 1)) = sum_der_right - sum_der_left;
+			fvec(ne * N + i + (K + 1) * (L - 1)) = (sum_der_right - sum_der_left ) * 0;
 		}
 	}
 }
@@ -100,16 +106,13 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 	Matrix ay(K+1, vector<double>(L+1,0)); chebyshev_y_derivative_2D_array(K, L, a, ay, BMAy);
 	Matrix ayy(K+1, vector<double>(L+1,0)); chebyshev_y_derivative_2D_array(K, L, ay, ayy, BMAy);
 
-	vector<double> alpha((K + 1) * (L + 1));
-	chebyshev_coefficients_2D(K+1, L+1, alpha0, alpha, BMAx, BPAx, BMAy, BPAy);
 
-	vector<double> vol((K + 1) * (L + 1));
-	chebyshev_coefficients_2D(K+1, L+1, vol0, vol, BMAx, BPAx, BMAy, BPAy);
 
 	// ( du2/dx2 +  du2/dy2 ) = -rho/eps_0 = alpha
+	double Volume = (4.0*BMAx*BMAy);
 	for (int i = 0; i < K+1; i++) {
 		for (int j = 0; j < L+1; j++) {
-			fvec(0 * N + i + (K + 1) * j) = axx[i][j] + ayy[i][j] - alpha[i + (K + 1) * j] + vol[i + (K + 1) * j];
+			fvec(0 * N + i + (K + 1) * j) = axx[i][j] + ayy[i][j] - alpha[i][j] + vol[i + (K + 1) * j] / Volume;
 		}
 	}
 
@@ -127,6 +130,18 @@ int main()
 	vector<double> a((K + 1) * (L + 1));
 
   clock_t c_start = clock();
+
+	chebyshev_coefficients_2D_array(K+1, L+1, alpha0, alpha, BMAx, BPAx, BMAy, BPAy);
+
+	chebyshev_coefficients_2D(K+1, L+1, vol0, vol, BMAx, BPAx, BMAy, BPAy);
+
+	cout << vol[0] << "\n";
+
+	chebyshev_x_integration_2D_array(K, L, alpha, alpha_ix, BMAx);
+	chebyshev_y_integration_2D_array(K, L, alpha_ix, alpha_ixy, BMAy);
+
+	cout << alpha_ixy[0][0] << "\n";
+
 	//x1 = newton(x0, gwrm);
 	/*
 	cout << "*** STEP 2: CALCULATE JACOBIAN *** \n";

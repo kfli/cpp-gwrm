@@ -102,7 +102,7 @@ Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(E
   int nelem = x.size();
 	int mk = 0;
 	int mmax = 1000;
-	double beta = 0.01;
+	double beta = 0.001;
 	Eigen::VectorXd gamma;
   Eigen::MatrixXd D(nelem,0);
 	Eigen::MatrixXd E(nelem,0);
@@ -151,7 +151,7 @@ Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(E
 			double cond = svd.singularValues()(0)
 				/ svd.singularValues()(svd.singularValues().size()-1);
 			cout << "condition number " << cond << "; mk = " << mk << endl;
-			while  (cond > pow(10,8) && mk > 2) {
+			while  (cond > pow(10,6) && mk > 2) {
 				D = D.block(0,1,D.rows(),D.cols()-1).eval();
 				E = E.block(0,1,E.rows(),E.cols()-1).eval();
 				mk = mk - 1;
@@ -160,11 +160,12 @@ Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(E
 					/ svd.singularValues()(svd.singularValues().size()-1);
 				cout << "condition number " << cond << "; mk = " << mk << endl;
 			}
-			gamma = D.colPivHouseholderQr().solve(f0);
+			//gamma = D.colPivHouseholderQr().solve(f0);
 			/* QR decomposition */
-			x0 = g0 - E * gamma;
+			//x0 = g0 - E * gamma;
 			/* SVD */
-			//x0 = g0 - E*D.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(f0);
+      gamma = D.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(f0);
+			x0 = g0 - E * gamma;
 			if (beta > 0 && beta < 1) {
 				x0 = x0 - (1 - beta) * (f0 - D * gamma);
 			}
@@ -172,8 +173,8 @@ Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(E
 		f1 = f0;
 		g1 = g0;
 
-        ++k;
-    } while (err > pow(10,-8) && k < 1000);
+    ++k;
+  } while (err > pow(10,-8) && k < 1000);
 	x1 = x0;
-    return x1;
+  return x1;
 }

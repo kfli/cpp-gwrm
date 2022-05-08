@@ -69,9 +69,9 @@ void chebyshev_coefficients_2D(int M, int N, double (*func)(double, double), vec
 
 void chebyshev_coefficients_2D(int M, int N, int sx, int sy,
 				int Nx, int Ny,
-				double (*func)(double, double), 
-				vector<double>& c, 
-				double BMA1, double BPA1, 
+				double (*func)(double, double),
+				vector<double>& c,
+				double BMA1, double BPA1,
 				double BMA2, double BPA2) {
 	const double PI = 3.141592653589793238463;
 	Matrix cfac(M, vector<double>(N));
@@ -102,7 +102,7 @@ void chebyshev_x_derivative_1D(int l, vector<double>& a, vector<double>& b, doub
 	b[l - 2] = 2 * (l - 1) * a[l - 1] / BMAx;
 	for (int k = R-1; k > 0; k--) {
 		b[k - 1] = b[k + 1] + 2 * k * a[k] / BMAx;
-	}	
+	}
 }
 
 void chebyshev_y_derivative_2D(int l, int m,  vector<double>& a,  vector<double>& b, double BMAy) {
@@ -182,7 +182,7 @@ void chebyshev_product_3D(int l, int m, int n, vector<double>& a, vector<double>
     double sum;
 #pragma omp parallel for private(sum) collapse(3)
     for (int x = 0; x <= l; x++) {
-        for (int y = 0; y <= m; y++) { 
+        for (int y = 0; y <= m; y++) {
             for (int z = 0; z <= n; z++) {
                 sum = 0.f;
                 for (int i = 0; i <= x; i++) {
@@ -304,7 +304,7 @@ void chebyshev_x_derivative_1D_array(int l, vector<double> &a, vector<double> &b
 	b[l - 2] = 2 * (l - 1) * a[l - 1] / BMAx;
 	for (int k = R-1; k > 0; k--) {
 		b[k - 1] = b[k + 1] + 2 * k * a[k] / BMAx;
-	}	
+	}
 }
 
 void chebyshev_x_derivative_2D_array(int l, int m, Matrix &a, Matrix &b, double BMAx) {
@@ -373,7 +373,39 @@ void chebyshev_z_derivative_3D_array(int l, int m, int n, Array3D &a, Array3D &b
     }
 }
 
-/*  Chebyshev integration */
+/*  Chebyshev 2D integration x-direction */
+void chebyshev_x_integration_2D_array(int l, int m, Matrix &a, Matrix &b, double BMA) {
+	double sum;
+#pragma omp parallel for private(sum)
+  for (int i = 0; i < l+1; i++) {
+		sum = 0;
+    for (int j = 1; j < m; j++) {
+      b[i][j] = BMA * (a[i][j-1] - a[i][j+1]) / (2 * j);
+			sum += pow(-1,j) * b[i][j];
+    }
+		b[i][m] = BMA * a[i][m-1] / (2 * m);
+		sum += pow(-1,m) * b[i][m];
+		b[i][0] = -2.0 * sum;
+  }
+}
+
+/*  Chebyshev 2D integration y-direction */
+void chebyshev_y_integration_2D_array(int l, int m, Matrix &a, Matrix &b, double BMA) {
+	double sum;
+#pragma omp parallel for private(sum)
+  for (int j = 0; j < m+1; j++) {
+		sum = 0;
+    for (int i = 1; i < l; i++) {
+      b[i][j] = BMA * (a[i-1][j] - a[i+1][j]) / (2 * i);
+			sum += pow(-1,i) * b[i][j];
+    }
+		b[l][j] = BMA * a[l-1][j] / (2 * l);
+		sum += pow(-1,l) * b[l][j];
+		b[0][j] = -2.0 * sum;
+  }
+}
+
+/*  Chebyshev 3D integration x-direction */
 void chebyshev_z_integration_3D_array(int l, int m, int n, Array3D &a, Array3D &b, double BMAz) {
 	double sum;
 #pragma omp parallel for collapse(2)
@@ -444,7 +476,7 @@ void chebyshev_product_3D_array(int l, int m, int n, Array3D &a, Array3D &b, Arr
     double sum;
 #pragma omp parallel for private(sum) collapse(3)
     for (int x = 0; x <= l; x++) {
-        for (int y = 0; y <= m; y++) { 
+        for (int y = 0; y <= m; y++) {
             for (int z = 0; z <= n; z++) {
                 sum = 0;
                 for (int i = 0; i <= x; i++) {
