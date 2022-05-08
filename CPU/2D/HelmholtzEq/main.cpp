@@ -13,14 +13,19 @@ const double PI = 3.141592653589793238463;
 int K = 22, L = 22;
 int N = (K + 1) * (L + 1);
 int Ne = 1;
-double Lx = -1.0, Rx = 1.0;
-double Ly = -1.0, Ry = 1.0;
+double Lx = 0.0, Rx = 10.0;
+double Ly = 0.0, Ry = 10.0;
 
 double BMAx = 0.5 * (Rx - Lx), BPAx = 0.5 * (Rx + Lx);
 double BMAy = 0.5 * (Ry - Ly), BPAy = 0.5 * (Ry + Ly);
 
 double alpha0(double x, double y) {
-	return exp(-10.0 * ( pow(x,2) + pow(y,2) ));
+	double x1 = 3.5, x2 = 6.5;
+	double y1 = 5.0, y2 = 5.0;
+	double omega1 = exp(-10.0 * ( pow((x - x1),2) + pow((y - y1),2)) );
+	double omega2 = exp(-10.0 * ( pow((x - x2),2) + pow((y - y2),2)) );
+	double s = omega1 + omega2;
+	return s;
 }
 
 vector<double> chebyshev_polynomials(double x, int n) {
@@ -101,7 +106,7 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 	chebyshev_coefficients_2D(K+1, L+1, alpha0, alpha, BMAx, BPAx, BMAy, BPAy);
 
 	// ( du2/dx2 +  du2/dy2 ) = -s**2 * u + alpha(x,y)
-	int s = 3.0;
+	int s = 1.0;
 	for (int i = 0; i < K+1; i++) {
 		for (int j = 0; j < L+1; j++) {
 			fvec(0 * N + i + (K + 1) * j) = axx[i][j] + ayy[i][j] + pow(s,2)*a[i][j] - alpha[i + (K + 1) * j];

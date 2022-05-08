@@ -13,17 +13,13 @@ const double PI = 3.141592653589793238463;
 int K = 22, L = 22;
 int N = (K + 1) * (L + 1);
 int Ne = 1;
-double Lx = -1.0, Rx = 1.0;
-double Ly = -1.0, Ry = 1.0;
+double Lx = 0.0, Rx = 1.0;
+double Ly = 0.0, Ry = 1.0;
 double BMAx = 0.5 * (Rx - Lx), BPAx = 0.5 * (Rx + Lx);
 double BMAy = 0.5 * (Ry - Ly), BPAy = 0.5 * (Ry + Ly);
 
 double alpha0(double x, double y) {
-	return exp(-10.0 * ( pow(x,2) + pow(y,2) ));
-}
-
-double vol0(double x, double y) {
-	return 0.0785386;
+	return sin(PI * x) * sin(PI * y);
 }
 
 Matrix alpha(K+1, vector<double>(L+1,0));
@@ -59,7 +55,7 @@ double eval_chebyshev_series(const vector<double> x, const double xp, const doub
 	return sum;
 }
 
-void boundary_conditions(Eigen::VectorXd& fvec, const Eigen::VectorXd& x) {
+void periodic_boundary_conditions(Eigen::VectorXd& fvec, const Eigen::VectorXd& x) {
 	double sum_right, sum_left;
 	double sum_der_right, sum_der_left;
 	vector<double> Ktmp((K + 1));
@@ -80,7 +76,33 @@ void boundary_conditions(Eigen::VectorXd& fvec, const Eigen::VectorXd& x) {
 			tie(sum_right, sum_der_right) = echebser1(1.0, Ltmp);
 			tie(sum_left, sum_der_left) = echebser1(-1.0, Ltmp);
 			fvec(ne * N + i + (K + 1) * L) = sum_right - sum_left;
-			fvec(ne * N + i + (K + 1) * (L - 1)) = (sum_der_right - sum_der_left ) * 0;
+			fvec(ne * N + i + (K + 1) * (L - 1)) = sum_der_right - sum_der_left;
+		}
+	}
+}
+
+void dirichlet_boundary_conditions(Eigen::VectorXd& fvec, const Eigen::VectorXd& x) {
+	double sum_right, sum_left;
+	double sum_der_right, sum_der_left;
+	vector<double> Ktmp((K + 1));
+	vector<double> Ltmp((L + 1));
+	// boundary conditions: K and K-1 mode
+	for (int ne = 0; ne < Ne; ne++) {
+		for (int j = 0; j < L+1; j++) {
+			for (int i = 0; i < K+1; i++) { Ktmp[i] = x(ne * N + i + (K + 1) * j); }
+			tie(sum_right, sum_der_right) = echebser1(1.0, Ktmp);
+			tie(sum_left, sum_der_left) = echebser1(-1.0, Ktmp);
+			fvec(ne * N + K + (K + 1) * j) = sum_right - 0.0;
+			fvec(ne * N + (K - 1) + (K + 1) * j) = sum_left - 0.0;
+		}
+
+		// boundary conditions: L and L-1 mode
+		for (int i = 0; i < K+1; i++) {
+			for (int j = 0; j < L+1; j++) { Ltmp[j] = x(ne * N + i + (K + 1) * j); }
+			tie(sum_right, sum_der_right) = echebser1(1.0, Ltmp);
+			tie(sum_left, sum_der_left) = echebser1(-1.0, Ltmp);
+			fvec(ne * N + i + (K + 1) * L) = sum_right - 0.0;
+			fvec(ne * N + i + (K + 1) * (L - 1)) = sum_right - 0.0;
 		}
 	}
 }
@@ -108,15 +130,15 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 
 
 
-	// ( du2/dx2 +  du2/dy2 ) = -rho/eps_0 = alpha
+	// ( du2/dx2 +  du2/dy2 ) = alpha
 	double Volume = (4.0*BMAx*BMAy);
 	for (int i = 0; i < K+1; i++) {
 		for (int j = 0; j < L+1; j++) {
-			fvec(0 * N + i + (K + 1) * j) = axx[i][j] + ayy[i][j] - alpha[i][j] + vol[i + (K + 1) * j] / Volume;
+			fvec(0 * N + i + (K + 1) * j) = axx[i][j] + ayy[i][j] - alpha[i][j] + 0.0*alpha_ixy[i][j] / Volume;
 		}
 	}
 
-	boundary_conditions(fvec, x);
+	dirichlet_boundary_conditions(fvec, x);
 
   return fvec;
 }
@@ -132,10 +154,6 @@ int main()
   clock_t c_start = clock();
 
 	chebyshev_coefficients_2D_array(K+1, L+1, alpha0, alpha, BMAx, BPAx, BMAy, BPAy);
-
-	chebyshev_coefficients_2D(K+1, L+1, vol0, vol, BMAx, BPAx, BMAy, BPAy);
-
-	cout << vol[0] << "\n";
 
 	chebyshev_x_integration_2D_array(K, L, alpha, alpha_ix, BMAx);
 	chebyshev_y_integration_2D_array(K, L, alpha_ix, alpha_ixy, BMAy);
