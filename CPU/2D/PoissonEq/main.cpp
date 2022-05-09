@@ -160,7 +160,7 @@ int main()
 
 	cout << alpha_ixy[0][0] << "\n";
 
-	//x1 = newton(x0, gwrm);
+	x1 = newton(x0, gwrm);
 	/*
 	cout << "*** STEP 2: CALCULATE JACOBIAN *** \n";
 	Eigen::VectorXd dh(nelem);
@@ -188,7 +188,7 @@ int main()
 	x1 = quasi_newton(x0, gwrm, H);
 	*/
 
-	x1 = anderson_acceleration(x0, gwrm);
+	//x1 = anderson_acceleration(x0, gwrm);
   clock_t c_end = clock();
   long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
   cout << "CPU time used: " << time_elapsed_ms << " ms\n";

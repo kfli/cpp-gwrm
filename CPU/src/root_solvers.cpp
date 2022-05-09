@@ -44,16 +44,20 @@ Eigen::VectorXd quasi_newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::Ve
 }
 
 Eigen::VectorXd newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd)) {
-  int nelem = x0.size();
-  Eigen::VectorXd dh;
-  Eigen::VectorXd x1(nelem);
-  x1 = x0;
+  	int nelem = x0.size();
+	double alpha = 1.0;
+  	Eigen::VectorXd dh;
+  	Eigen::VectorXd x1(nelem);
+  	x1 = x0;
 
-  Eigen::VectorXd f0(nelem);
-  Eigen::VectorXd f1(nelem);
+  	Eigen::VectorXd f0(nelem);
+  	Eigen::VectorXd f1(nelem);
 
-  Eigen::MatrixXd J(nelem,nelem);
-  Eigen::MatrixXd J1(nelem,nelem);
+  	Eigen::MatrixXd J(nelem,nelem);
+  	Eigen::MatrixXd J1(nelem,nelem);
+
+  	Eigen::MatrixXd I(nelem,nelem);
+	I.setIdentity();
 
 	f0 = f(x0);
 	double h = pow(10,-6);
@@ -70,7 +74,7 @@ Eigen::VectorXd newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd
     double err = 1.0;
     int k = 0;
     do {
-        x1 = x0 - J.inverse()*f0;
+        x1 = x0 - 0.95 * ( J.colPivHouseholderQr().solve(I) ) * f0;
         f1 = f(x1);
 
         err = f1.squaredNorm();
@@ -82,7 +86,7 @@ Eigen::VectorXd newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd
         x0 = x1;
         f0 = f1;
 
-		f0 = f(x0);
+		f0 = (1.0 - alpha) * x0 + alpha * f(x0);
 		double h = pow(10,-6);
 		for (int j = 0; j < nelem; j++) {
 			dh = Eigen::VectorXd::Zero(nelem);
@@ -100,7 +104,7 @@ Eigen::VectorXd newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd
 
 Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(Eigen::VectorXd)) {
 	int nelem = x.size();
-  	double alpha = 0.95;
+  	double alpha = 1.0;
   	int mk = 0;
 	int mmax = 1000;
 	int kmax = 10000;

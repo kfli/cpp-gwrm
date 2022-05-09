@@ -10,11 +10,11 @@ using namespace std;
 const double PI = 3.141592653589793238463;
 
 // Define global variables
-int K = 5, L = 5, M = 5;
+int K = 5, L = 5, M = 2;
 int N = (K + 1) * (L + 1) * (M + 1);
 int Ne = 2;
 int Nm = N * Ne;
-int Nx = 1, Ny = 1;
+int Nx = 3, Ny = 3;
 double Lx = 0, Rx = 2.0 * PI;
 double Ly = 0, Ry = 2.0 * PI;
 double Lt = 0, Rt = 0.0001;
@@ -154,8 +154,8 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 	for (int sx = 0; sx < Nx; sx++) {
 		for (int sy = 0; sy < Ny; sy++) {
 			// boundary conditions: K and K-1 mode
-			for (int j = 1; j < L+1; j++) {
-				for (int k = 1; k < M+1; k++) {
+			for (int j = 0; j < L+1; j++) {
+				for (int k = 0; k < M+1; k++) {
 					for (int i = 0; i < K+1; i++) {
 						ac_tmp[i] = x(( sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						bc_tmp[i] = x(( sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
@@ -203,8 +203,8 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 			}
 			
 			// boundary conditions: L and L-1 mode
-			for (int i = 1; i < K+1; i++) {
-				for (int k = 1; k < M+1; k++) {
+			for (int i = 0; i < K+1; i++) {
+				for (int k = 0; k < M+1; k++) {
 					for (int j = 0; j < L+1; j++) {
 						ac_tmp[j] = x(( sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
 						bc_tmp[j] = x(( sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
@@ -406,7 +406,7 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 					tie(ar_sol_left, ar_der_left) = echebser1(-1.0, ar_tmp);
 
 					fvec(( sx + Nx * sy ) * Nm + 0 * N + (K - 1) + (K + 1) * ( j + (L + 1) * k )) = ac_sol_left - al_sol_right;
-					//fvec(( sx + Nx * sy ) * Nm + 0 * N + K + (K + 1) * ( j + (L + 1) * k )) = ac_der_right - ar_der_left;
+					fvec(( sx + Nx * sy ) * Nm + 0 * N + K + (K + 1) * ( j + (L + 1) * k )) = ac_der_right - ar_der_left;
 						
 					tie(bl_sol_right, bl_der_right) = echebser1(1.0, bl_tmp);
 					tie(bc_sol_left, bc_der_left) = echebser1(-1.0, bc_tmp);
@@ -414,7 +414,7 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 					tie(br_sol_left, br_der_left) = echebser1(-1.0, br_tmp);
 
 					fvec(( sx + Nx * sy ) * Nm + 1 * N + (K - 1) + (K + 1) * ( j + (L + 1) * k )) = bc_sol_left - bl_sol_right;
-					//fvec(( sx + Nx * sy ) * Nm + 1 * N + K + (K + 1) * ( j + (L + 1) * k )) = bc_der_right - br_der_left;
+					fvec(( sx + Nx * sy ) * Nm + 1 * N + K + (K + 1) * ( j + (L + 1) * k )) = bc_der_right - br_der_left;
 				}
 			}
 			
@@ -455,7 +455,7 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 					tie(ar_sol_left, ar_der_left) = echebser1(-1.0, ar_tmp);
 
 					fvec(( sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( (L - 1) + (L + 1) * k )) = ac_sol_left - al_sol_right;
-					//fvec(( sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( L + (L + 1) * k )) = ac_der_right - ar_der_left;
+					fvec(( sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( L + (L + 1) * k )) = ac_der_right - ar_der_left;
 						
 					tie(bl_sol_right, bl_der_right) = echebser1(1.0, bl_tmp);
 					tie(bc_sol_left, bc_der_left) = echebser1(-1.0, bc_tmp);
@@ -463,7 +463,7 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 					tie(br_sol_left, br_der_left) = echebser1(-1.0, br_tmp);
 
 					fvec(( sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( (L - 1) + (L + 1) * k )) = bc_sol_left - bl_sol_right;
-					//fvec(( sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( L + (L + 1) * k )) = bc_der_right - br_der_left;
+					fvec(( sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( L + (L + 1) * k )) = bc_der_right - br_der_left;
 				}
 			}
 		}
@@ -510,7 +510,7 @@ int main()
     }
 	cout << "*** STEP 2: START SOLVER *** \n";
     clock_t c_start = clock();
-	//x1 = newton(x0, gwrm);
+	x1 = newton(x0, gwrm);
 	/*
 	cout << "*** STEP 2.1: COMPUTE INITIAL JACOBIAN *** \n";
 	Eigen::VectorXd dh(Nt);
@@ -537,8 +537,8 @@ int main()
 	x1 = quasi_newton(x0, gwrm, H_inv);
 	*/
 	
-	cout << "*** STEP 3.0: BEGIN: ANDERSON ACCELERATION *** \n";
-	x1 = anderson_acceleration(x0, gwrm);
+	//cout << "*** STEP 3.0: BEGIN: ANDERSON ACCELERATION *** \n";
+	//x1 = anderson_acceleration(x0, gwrm);
 
     clock_t c_end = clock();
     long double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
