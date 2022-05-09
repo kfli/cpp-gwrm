@@ -99,37 +99,41 @@ Eigen::VectorXd newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::VectorXd
 }
 
 Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(Eigen::VectorXd)) {
-  int nelem = x.size();
-	int mk = 0;
+	int nelem = x.size();
+  	double alpha = 0.95;
+  	int mk = 0;
 	int mmax = 1000;
-  int kmax = 10000;
+	int kmax = 10000;
 	double beta = 0.01;
 	Eigen::VectorXd gamma;
-  Eigen::MatrixXd D(nelem,0);
+	Eigen::MatrixXd D(nelem,0);
 	Eigen::MatrixXd E(nelem,0);
 
 	Eigen::VectorXd x0(nelem);
-  Eigen::VectorXd x1(nelem);
-  Eigen::VectorXd f0(nelem);
-  Eigen::VectorXd f1(nelem);
+  	Eigen::VectorXd x1(nelem);
+  	Eigen::VectorXd f0(nelem);
+  	Eigen::VectorXd f1(nelem);
 	Eigen::VectorXd g0(nelem);
-  Eigen::VectorXd g1(nelem);
+  	Eigen::VectorXd g1(nelem);
 
 	x0 = x;
 
-  double err = 1.0;
-  int k = 0;
+  	double err = 1.0;
+  	int k = 0;
 	int p = 0;
-  do {
-    f0 = f(x0);
+  	do {
+		if (alpha == 1.0){
+			f0 = f(x0);
+		} else {
+			f0 = (1.0 - alpha) * x0 + alpha * f(x0);
+		}
 		g0 = f0 + x0;
 
-    err = f0.squaredNorm();
+		err = f0.squaredNorm();
 		cout << "k = " << k << "; err = " << err << endl;
 		if (err < pow(10,-8)) {
 			break;
 		}
-
 		if (k == 0) {
 			x0 = beta * f0 + x0;
 		} else {
@@ -165,7 +169,7 @@ Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(E
 			/* QR decomposition */
 			//x0 = g0 - E * gamma;
 			/* SVD */
-      gamma = D.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(f0);
+			gamma = D.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(f0);
 			x0 = g0 - E * gamma;
 			if (beta > 0 && beta < 1) {
 				x0 = x0 - (1 - beta) * (f0 - D * gamma);
@@ -174,8 +178,8 @@ Eigen::VectorXd anderson_acceleration(Eigen::VectorXd& x, Eigen::VectorXd (*f)(E
 		f1 = f0;
 		g1 = g0;
 
-    ++k;
-  } while (err > pow(10,-8) && k < kmax);
-	x1 = x0;
-  return x1;
+		++k;
+  	} while (err > pow(10,-8) && k < kmax);
+		x1 = x0;
+  	return x1;
 }

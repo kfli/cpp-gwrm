@@ -13,13 +13,13 @@ const double PI = 3.141592653589793238463;
 int K = 22, L = 22;
 int N = (K + 1) * (L + 1);
 int Ne = 1;
-double Lx = 0.0, Rx = 1.0;
-double Ly = 0.0, Ry = 1.0;
+double Lx = -1.0, Rx = 1.0;
+double Ly = -1.0, Ry = 1.0;
 double BMAx = 0.5 * (Rx - Lx), BPAx = 0.5 * (Rx + Lx);
 double BMAy = 0.5 * (Ry - Ly), BPAy = 0.5 * (Ry + Ly);
 
 double alpha0(double x, double y) {
-	return sin(PI * x) * sin(PI * y);
+	return exp(-10.0 * ( pow(x,2) + pow(y,2) ));
 }
 
 Matrix alpha(K+1, vector<double>(L+1,0));
@@ -134,11 +134,11 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 	double Volume = (4.0*BMAx*BMAy);
 	for (int i = 0; i < K+1; i++) {
 		for (int j = 0; j < L+1; j++) {
-			fvec(0 * N + i + (K + 1) * j) = axx[i][j] + ayy[i][j] - alpha[i][j] + 0.0*alpha_ixy[i][j] / Volume;
+			fvec(0 * N + i + (K + 1) * j) = axx[i][j] + ayy[i][j] - alpha[i][j] + alpha_ixy[i][j] / Volume;
 		}
 	}
 
-	dirichlet_boundary_conditions(fvec, x);
+	periodic_boundary_conditions(fvec, x);
 
   return fvec;
 }

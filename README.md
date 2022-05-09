@@ -29,8 +29,8 @@ Windows
    ```
 
 ## Install Eigen
-1. Download and extract Eigen (Win - 'C:\'; Linux - /usr/local/include)
-2. Link to Eigen folder in Makefile 
+1. Download and extract Eigen (e.g. Linux - /usr/local/include)
+2. Link to Eigen folder in Makefile (EIG_DIR = /usr/local/include/eigen-3.4.0/)
 
 ## Post-processing
 ```bash
