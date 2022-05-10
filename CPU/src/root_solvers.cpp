@@ -20,7 +20,7 @@ Eigen::VectorXd quasi_newton(Eigen::VectorXd& x0, Eigen::VectorXd (*f)(Eigen::Ve
   double err = 1.0;
   int k = 0;
   do {
-    x1 = x0 - H*f0;
+    x1 = x0 - 0.95 * H * f0;
     f1 = f(x1);
 
     s = x1 - x0;

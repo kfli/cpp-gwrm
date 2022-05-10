@@ -3,8 +3,19 @@
 ## Examples
 
 ### 2D Burgers
-t = 1.0, (Nx = Ny = 1, K = L = 22, M = 5) \
-![alt text](CPU/2D/NonlinearBurger/Figure_1.png "2D Burger solution") 
+To run the 2D Burger example.
+```bash 
+cd CPU/2D/Burger
+```
+Make sure that `TARGET = main` in the Makefile.
+```bash 
+make
+```
+```bash 
+./main
+```
+`t = 1.0, (Nx = Ny = 1, K = L = 22, M = 5)` \
+![alt text](doc/png/Burger_1.png "2D Burger solution") 
 
 ### 2D Ideal MHD
 

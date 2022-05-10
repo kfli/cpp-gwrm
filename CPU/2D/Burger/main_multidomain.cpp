@@ -10,14 +10,14 @@ using namespace std;
 const double PI = 3.141592653589793238463;
 
 // Define global variables
-int K = 5, L = 5, M = 2;
+int K = 5, L = 5, M = 5;
 int N = (K + 1) * (L + 1) * (M + 1);
 int Ne = 2;
 int Nm = N * Ne;
 int Nx = 3, Ny = 3;
 double Lx = 0, Rx = 2.0 * PI;
 double Ly = 0, Ry = 2.0 * PI;
-double Lt = 0, Rt = 0.0001;
+double Lt = 0, Rt = 0.5;
 
 vector<double> x_grid(Nx+1);
 vector<double> y_grid(Ny+1);
@@ -70,7 +70,8 @@ double eval_chebyshev_series(const vector<double> x, int ne, const double xp, co
 // GWRM linear function
 Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
     int Nt = x.size();
-	double sum;
+	Eigen::VectorXd fvec = Eigen::VectorXd::Zero(Nt);
+
 	double al_sol_right, al_sol_left, ac_sol_left, ac_sol_right, ar_sol_left, ar_sol_right;
 	double al_der_right, al_der_left, ac_der_left, ac_der_right, ar_der_left, ar_der_right;
 	double bl_sol_right, bl_sol_left, bc_sol_left, bc_sol_right, br_sol_left, br_sol_right;
@@ -81,78 +82,24 @@ Eigen::VectorXd gwrm_linear(const Eigen::VectorXd x) {
 	vector<double> bl_tmp(K+1);
 	vector<double> bc_tmp(K+1);
 	vector<double> br_tmp(K+1);
-	bool is_integration = false;
-    Eigen::VectorXd fvec = Eigen::VectorXd::Zero(Nt);
-	Array3D a = Array3D(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));
-	Array3D b = Array3D(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));
 	
 	for (int sx = 0; sx < Nx; sx++) {
 		for (int sy = 0; sy < Ny; sy++) {
+			// initial condition: M mode
 			for (int i = 0; i < K+1; i++) {
 				for (int j = 0; j < L+1; j++) {
 					for (int k = 0; k < M+1; k++) {
-						a[i][j][k] = x(( sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
-						b[i][j][k] = x(( sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
-					}	
+						ac_tmp[k] = x(( sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k ));
+						bc_tmp[k] = x(( sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k ));
+					}
+					tie(ac_sol_left, ac_der_left) = echebser1(-1.0, ac_tmp);
+					fvec(( sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * M )) = ac_sol_left - init_as[( sx + Nx * sy ) * (K + 1) * (L + 1) + i + (K + 1) * j];
+					
+					tie(bc_sol_left, bc_der_left) = echebser1(-1.0, bc_tmp);
+					fvec(( sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * M )) = bc_sol_left - init_bs[( sx + Nx * sy ) * (K + 1) * (L + 1) + i + (K + 1) * j];
 				}
 			}
-			
-			// derivatives
-			Array3D ax(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));  chebyshev_x_derivative_3D_array(K, L, M, a, ax, BMAx[sx]);
-			Array3D axx(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0))); chebyshev_x_derivative_3D_array(K, L, M, ax, axx, BMAx[sx]);
-			Array3D ay(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));  chebyshev_y_derivative_3D_array(K, L, M, a, ay, BMAy[sy]);
-			Array3D ayy(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0))); chebyshev_y_derivative_3D_array(K, L, M, ay, ayy, BMAy[sy]);
-			Array3D at(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));  
-			
-			Array3D bx(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));  chebyshev_x_derivative_3D_array(K, L, M, b, bx, BMAx[sx]);
-			Array3D bxx(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0))); chebyshev_x_derivative_3D_array(K, L, M, bx, bxx, BMAx[sx]);
-			Array3D by(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));  chebyshev_y_derivative_3D_array(K, L, M, b, by, BMAy[sy]);
-			Array3D byy(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0))); chebyshev_y_derivative_3D_array(K, L, M, by, byy, BMAy[sy]);
-			Array3D bt(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));  
 
-			// du/dt + u.du/dx + v.du/dy - nu.( du2/dx2 +  du2/dy2 ) = 0
-			// dv/dt + u.dv/dx + v.dv/dy - nu.( dv2/dx2 +  dv2/dy2 ) = 0
-			double nu = 0.05;
-			if (!is_integration) {
-				chebyshev_z_derivative_3D_array(K, L, M, a, at, BMAt);
-				chebyshev_z_derivative_3D_array(K, L, M, b, bt, BMAt);
-
-				for (int i = 0; i < K-1; i++) {
-					for (int j = 0; j < L-1; j++) {
-						for (int k = 0; k < M; k++) {
-								fvec(( sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k )) = at[i][j][k] - nu * (axx[i][j][k] + ayy[i][j][k]);
-								fvec(( sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k )) = bt[i][j][k] - nu * (bxx[i][j][k] + byy[i][j][k]);
-						}
-					}
-				}
-				
-			} else {
-				Array3D ai(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));
-				Array3D bi(K+1, vector<vector<double>>(L+1, vector<double>(M+1,0)));
-				for (int i = 0; i < K-1; i++) {
-					for (int j = 0; j < L-1; j++) {
-						for (int k = 0; k < M + 1; k++) {
-								at[i][j][k] = nu * (axx[i][j][k] + ayy[i][j][k]);
-								bt[i][j][k] = nu * (bxx[i][j][k] + byy[i][j][k]);
-						}
-					}
-				}
-				chebyshev_z_integration_3D_array(K, L, M, at, ai, BMAt);
-				chebyshev_z_integration_3D_array(K, L, M, bt, bi, BMAt);
-				for (int i = 0; i < K-1; i++) {
-					for (int j = 0; j < L-1; j++) {
-						for (int k = 0; k < M + 1; k++) {
-								fvec(( sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k )) = ai[i][j][k] - a[i][j][k];
-								fvec(( sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k )) = bi[i][j][k] - b[i][j][k];
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	for (int sx = 0; sx < Nx; sx++) {
-		for (int sy = 0; sy < Ny; sy++) {
 			// boundary conditions: K and K-1 mode
 			for (int j = 0; j < L+1; j++) {
 				for (int k = 0; k < M+1; k++) {
@@ -315,13 +262,13 @@ Eigen::VectorXd gwrm(const Eigen::VectorXd x) {
 				for (int i = 0; i < K-1; i++) {
 					for (int j = 0; j < L-1; j++) {
 						for (int k = 0; k < M; k++) {
-								fvec(( sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k )) = at[i][j][k] + a_ax[i][j][k] + b_ay[i][j][k] - nu * (axx[i][j][k] + ayy[i][j][k]);
-								fvec(( sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k )) = bt[i][j][k] + a_bx[i][j][k] + b_by[i][j][k] - nu * (bxx[i][j][k] + byy[i][j][k]);
+								fvec(( sx + Nx * sy ) * Nm + 0 * N + i + (K + 1) * ( j + (L + 1) * k )) = at[i][j][k] + 0.0*a_ax[i][j][k] + 0.0*b_ay[i][j][k] - nu * (axx[i][j][k] + ayy[i][j][k]);
+								fvec(( sx + Nx * sy ) * Nm + 1 * N + i + (K + 1) * ( j + (L + 1) * k )) = bt[i][j][k] + 0.0*a_bx[i][j][k] + 0.0*b_by[i][j][k] - nu * (bxx[i][j][k] + byy[i][j][k]);
 						}
 					}
 				}
 				
-				// initial condition: M mode (0th mode?)
+				// initial condition: M mode
 				for (int i = 0; i < K+1; i++) {
 					for (int j = 0; j < L+1; j++) {
 						sum = 0.5 * a[i][j][0];
@@ -531,10 +478,10 @@ int main()
 	cout << "*** STEP 2.2: COMPUTE INVERSE *** \n";
 	Eigen::MatrixXd I(Nt,Nt);
 	I.setIdentity();
-	Eigen::MatrixXd  H_inv =  H.colPivHouseholderQr().solve(I);
+	H =  H.colPivHouseholderQr().solve(I);
 
 	cout << "*** STEP 2.3: BEGIN: QUASI NEWTON *** \n";
-	x1 = quasi_newton(x0, gwrm, H_inv);
+	x1 = quasi_newton(x0, gwrm, H);
 	*/
 	
 	//cout << "*** STEP 3.0: BEGIN: ANDERSON ACCELERATION *** \n";

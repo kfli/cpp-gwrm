@@ -10,7 +10,7 @@ using namespace std;
 const double PI = 3.141592653589793238463;
 
 // Define global variables
-int K = 12, L = 12, M = 3;
+int K = 18, L = 18, M = 3;
 int N = (K + 1) * (L + 1) * (M + 1);
 int Ne = 7;
 double Lx = 0, Rx = 2.0 * PI;
@@ -30,8 +30,7 @@ vector<double> init_H((K + 1) * (L + 1));
 vector<double> init_p((K + 1) * (L + 1));
 
 double q0(double x, double y) {
-	double gamma = 5.0/3.0;
-	return pow(gamma,2);
+	return pow(5.0/3.0,2);
 }
 double u0(double x, double y) {
 	return -sin(y);
@@ -46,8 +45,7 @@ double H0(double x, double y) {
 	return sin(2.0 * y);
 }
 double p0(double x, double y) {
-	double gamma = 5.0/3.0;
-	return gamma;
+	return 5.0/3.0;
 }
 
 vector<double> chebyshev_polynomials(double x, int n) {
